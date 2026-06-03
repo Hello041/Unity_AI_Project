@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d20b22d37f32fb240a4f5e62d9c6377f, type: 3}
+  m_Name: RookDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::TacticalRoguelike.Gameplay.Pieces.PieceDefinition
+  pieceType: 1
+  displayName: Rook
+  loadoutCost: 3
+  baseCooldown: 1.5
+  playerSprite: {fileID: 21300000, guid: 4898e0cd1ac560b4b83a8023235dc46d, type: 3}
+  enemySprite: {fileID: 21300000, guid: ce2ba07a3a7f693428173dcac82196b3, type: 3}

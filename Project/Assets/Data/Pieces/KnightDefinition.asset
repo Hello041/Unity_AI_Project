@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d20b22d37f32fb240a4f5e62d9c6377f, type: 3}
+  m_Name: KnightDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::TacticalRoguelike.Gameplay.Pieces.PieceDefinition
+  pieceType: 2
+  displayName: Knight
+  loadoutCost: 2
+  baseCooldown: 1.25
+  playerSprite: {fileID: 21300000, guid: 7521830cf07d2e545aa1f96ca0cbfb53, type: 3}
+  enemySprite: {fileID: 21300000, guid: 6fc62eb65c803c446b8f9973da9d9ebb, type: 3}

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b46fe05c9d932f49a107bee6a44ae1e, type: 3}
+  m_Name: PatternB_KingKnightPawnPawn
+  m_EditorClassIdentifier: Assembly-CSharp::TacticalRoguelike.Gameplay.Stage.EnemySetupDefinition
+  patternName: PatternB_KingKnightPawnPawn
+  randomWeight: 1
+  spawnEntries:
+  - PieceDefinition: {fileID: 11400000, guid: b080abf43a99f5f47acc74488417c47a, type: 2}
+    Position:
+      X: 2
+      Y: 5
+  - PieceDefinition: {fileID: 11400000, guid: 746ef92da5edb914087d4fb7d0710a4e, type: 2}
+    Position:
+      X: 1
+      Y: 5
+  - PieceDefinition: {fileID: 11400000, guid: 9c51cfa868939b74ba87ea32655f191d, type: 2}
+    Position:
+      X: 3
+      Y: 4
+  - PieceDefinition: {fileID: 11400000, guid: 9c51cfa868939b74ba87ea32655f191d, type: 2}
+    Position:
+      X: 4
+      Y: 4
