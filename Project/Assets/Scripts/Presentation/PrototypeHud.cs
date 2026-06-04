@@ -147,7 +147,6 @@ public void ResetPrototype()
             {
                 gameManager.EnterBoot();
                 gameManager.StartStage();
-                gameManager.StartPreparation();
             }
 
             if (preparationManager != null)

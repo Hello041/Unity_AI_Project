@@ -10,6 +10,7 @@ namespace TacticalRoguelike.Gameplay.Health
 
         private int currentHp;
         private bool initialized;
+        private bool depletionPublished;
 
         public event Action<HealthEventData> OnHealthChanged;
         public event Action<HealthEventData> OnHealthDepleted;
@@ -29,25 +30,37 @@ namespace TacticalRoguelike.Gameplay.Health
             get { return initialized && currentHp <= 0; }
         }
 
-        public void Initialize(int hp)
+public void Initialize(int hp)
         {
-            startingHp = Mathf.Max(1, hp);
+            ResetForStage(hp);
+        }
+
+public void ResetForStage(int maxHealth)
+        {
+            startingHp = Mathf.Max(1, maxHealth);
             currentHp = startingHp;
             initialized = true;
+            depletionPublished = false;
             PublishHealthChanged(0);
         }
 
-        public void ResetHealth()
+
+public void ResetHealth()
         {
-            Initialize(startingHp);
+            ResetForStage(startingHp);
         }
 
-        public void ApplyPlayerKingCapturedDamage()
+public void ApplyPlayerKingCapturedDamage()
         {
-            ApplyDamage(1);
+            TakeDamage();
         }
 
-        public void ApplyDamage(int amount)
+public void ApplyDamage(int amount)
+        {
+            TakeDamage(amount);
+        }
+
+public void TakeDamage(int amount = 1)
         {
             if (!initialized)
             {
@@ -68,8 +81,9 @@ namespace TacticalRoguelike.Gameplay.Health
             currentHp = Mathf.Max(0, currentHp - safeAmount);
             HealthEventData data = PublishHealthChanged(safeAmount);
 
-            if (currentHp <= 0)
+            if (currentHp == 0 && !depletionPublished)
             {
+                depletionPublished = true;
                 Action<HealthEventData> handler = OnHealthDepleted;
                 if (handler != null)
                 {
@@ -77,6 +91,7 @@ namespace TacticalRoguelike.Gameplay.Health
                 }
             }
         }
+
 
         private HealthEventData PublishHealthChanged(int damageAmount)
         {

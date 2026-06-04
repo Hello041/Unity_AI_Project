@@ -1,4 +1,5 @@
 using System;
+using TacticalRoguelike.Data;
 using TacticalRoguelike.Gameplay.Health;
 using UnityEngine;
 
@@ -14,6 +15,9 @@ namespace TacticalRoguelike.Core
 
         [SerializeField]
         private PlayerHealthService playerHealthService;
+
+        [SerializeField]
+        private StageDefinition stageDefinition;
 
         [SerializeField]
         private bool autoEnterPreparationOnStart = true;
@@ -66,14 +70,13 @@ namespace TacticalRoguelike.Core
             }
         }
 
-        private void Start()
+private void Start()
         {
             EnterBoot();
 
             if (autoEnterPreparationOnStart)
             {
                 StartStage();
-                StartPreparation();
             }
         }
 
@@ -82,7 +85,7 @@ namespace TacticalRoguelike.Core
             ChangeState(GameState.Boot);
         }
 
-        public void StartStage()
+public void StartStage()
         {
             if (currentState != GameState.Boot)
             {
@@ -90,9 +93,13 @@ namespace TacticalRoguelike.Core
                 return;
             }
 
-            playerHealthService.Initialize(playerStartingHp);
             ChangeState(GameState.StageStart);
+
+            int maxHealth = stageDefinition != null ? stageDefinition.PlayerMaxHealth : playerStartingHp;
+            playerHealthService.ResetForStage(maxHealth);
             PublishStageEvent(OnStageStarted, "Stage started.");
+
+            StartPreparation();
         }
 
         public void StartPreparation()
@@ -139,12 +146,7 @@ public void NotifyPlayerKingCaptured()
                 return;
             }
 
-            playerHealthService.ApplyPlayerKingCapturedDamage();
-
-            if (playerHealthService.IsDepleted)
-            {
-                HandlePlayerHealthDepleted(new HealthEventData(playerHealthService.CurrentHp, playerHealthService.MaxHp, 0));
-            }
+            playerHealthService.TakeDamage();
         }
 
         [ContextMenu("Debug/Start Battle")]
@@ -165,9 +167,9 @@ public void NotifyPlayerKingCaptured()
             NotifyEnemyKingCaptured();
         }
 
-        private void HandlePlayerHealthDepleted(HealthEventData data)
+private void HandlePlayerHealthDepleted(HealthEventData data)
         {
-            if (currentState == GameState.GameOver)
+            if (currentState != GameState.Playing)
             {
                 return;
             }
@@ -193,9 +195,12 @@ public void NotifyPlayerKingCaptured()
             }
         }
 
-        private void PublishStageEvent(Action<StageEventData> stageEvent, string message)
+private void PublishStageEvent(Action<StageEventData> stageEvent, string message)
         {
-            StageEventData data = new StageEventData(currentState, stageId, message);
+            string activeStageId = stageDefinition != null && !string.IsNullOrWhiteSpace(stageDefinition.StageName)
+                ? stageDefinition.StageName
+                : stageId;
+            StageEventData data = new StageEventData(currentState, activeStageId, message);
             Debug.Log(message);
 
             if (stageEvent != null)

@@ -1,3 +1,18 @@
+Prompt02 is complete and accepted.
+
+Do not rewrite, replace, or refactor:
+
+- GameManager
+- GameState
+- StageDefinition
+- PlayerHealthService
+- HealthEventData
+- StageEventData
+
+unless a minimal integration change is strictly required.
+
+Build only the systems requested in Prompt03.
+
 # Prompt 03 - Board, Loadout, Placement, Pieces, Capture, and Cooldown Next Step
 
 You are a senior Unity and C# game developer.

@@ -6683,6 +6683,7 @@ MonoBehaviour:
   stageId: MVP_STAGE_01
   playerStartingHp: 3
   playerHealthService: {fileID: 1385456176}
+  stageDefinition: {fileID: 11400000, guid: 63aecbbb837287547b078fb42914af0a, type: 2}
   autoEnterPreparationOnStart: 1
 --- !u!4 &1385456178
 Transform:
