@@ -5,7 +5,7 @@ namespace TacticalRoguelike.Gameplay.Cooldown
     public sealed class PlayerGlobalCooldown : MonoBehaviour
     {
         [SerializeField]
-        private float cooldownDuration = 0.4f;
+        private float cooldownDuration = 1f;
 
         [SerializeField]
         private float remainingTime;
@@ -33,6 +33,11 @@ namespace TacticalRoguelike.Gameplay.Cooldown
             }
 
             remainingTime = Mathf.Max(0f, remainingTime - Time.deltaTime);
+        }
+
+        private void OnValidate()
+        {
+            cooldownDuration = Mathf.Clamp(cooldownDuration, 1f, 3f);
         }
 
         public void StartCooldown()

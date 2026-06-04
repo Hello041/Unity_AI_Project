@@ -3,10 +3,10 @@ using System;
 namespace TacticalRoguelike.Gameplay.Board
 {
     [Serializable]
-    public struct GridPosition : IEquatable<GridPosition>
+    public readonly struct GridPosition : IEquatable<GridPosition>
     {
-        public int X;
-        public int Y;
+        public int X { get; }
+        public int Y { get; }
 
         public GridPosition(int x, int y)
         {
@@ -21,12 +21,7 @@ namespace TacticalRoguelike.Gameplay.Board
 
         public override bool Equals(object obj)
         {
-            if (!(obj is GridPosition))
-            {
-                return false;
-            }
-
-            return Equals((GridPosition)obj);
+            return obj is GridPosition other && Equals(other);
         }
 
         public override int GetHashCode()

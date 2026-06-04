@@ -15,15 +15,12 @@ MonoBehaviour:
   patternName: PatternA_KingRookPawn
   randomWeight: 1
   spawnEntries:
-  - PieceDefinition: {fileID: 11400000, guid: b080abf43a99f5f47acc74488417c47a, type: 2}
-    Position:
-      X: 2
-      Y: 5
-  - PieceDefinition: {fileID: 11400000, guid: 360de1b4a295d004ab5d20887b799e29, type: 2}
-    Position:
-      X: 0
-      Y: 5
-  - PieceDefinition: {fileID: 11400000, guid: 9c51cfa868939b74ba87ea32655f191d, type: 2}
-    Position:
-      X: 3
-      Y: 4
+  - pieceDefinition: {fileID: 11400000, guid: b080abf43a99f5f47acc74488417c47a, type: 2}
+    x: 2
+    y: 5
+  - pieceDefinition: {fileID: 11400000, guid: 360de1b4a295d004ab5d20887b799e29, type: 2}
+    x: 0
+    y: 5
+  - pieceDefinition: {fileID: 11400000, guid: 9c51cfa868939b74ba87ea32655f191d, type: 2}
+    x: 3
+    y: 4

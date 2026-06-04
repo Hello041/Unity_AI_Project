@@ -39,8 +39,9 @@ namespace TacticalRoguelike.Gameplay.Interaction
             EnsureReferences();
         }
 
-private void Update()
+        private void Update()
         {
+#if ENABLE_LEGACY_INPUT_MANAGER
             if (!Input.GetMouseButtonDown(0))
             {
                 return;
@@ -56,6 +57,7 @@ private void Update()
             {
                 HandleTileClicked(clickedPosition);
             }
+#endif
         }
 
         public void ClearSelection()
