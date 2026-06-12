@@ -34,8 +34,12 @@ namespace TacticalRoguelike.Gameplay.Interaction
 
         [SerializeField]
         private ManualPlacementController manualPlacementController;
-
         private PieceController selectedPiece;
+
+        public PieceController SelectedPiece
+        {
+            get { return selectedPiece; }
+        }
         private readonly List<GridPosition> currentValidPositions = new List<GridPosition>();
 
         private void Awake()

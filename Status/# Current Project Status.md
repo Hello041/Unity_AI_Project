@@ -8,7 +8,7 @@ Unity 6.3 LTS (6000.3.11f1)
 
 Current Development Stage:
 
-After Prompt05 Completion
+After Prompt06 Completion
 
 ---
 
@@ -152,6 +152,46 @@ Verified:
 
 ---
 
+### Prompt06
+
+Playable Build Polish and UX Improvement Pass
+
+Completed:
+
+* Title screen and Start Game flow
+* StageClear and GameOver result screens
+* Restart Current Session and Return To Title
+* Exactly one Player King validation
+* Preparation-only placed piece repositioning
+* Player King capture battle reset
+* Retry loadout preservation
+* Retry enemy setup preservation
+* Player first move phase
+* Enemy AI first-move gate
+* First move battle notice
+* Global cooldown progress bar
+* Selected piece information panel
+* Enemy team composition panel
+* Battle and Enemy AI status display
+
+Verified:
+
+* Enemy AI inactive before first successful player move: PASS
+* Invalid movement does not activate Enemy AI: PASS
+* First successful player move activates Enemy AI: PASS
+* First move notice visibility and removal: PASS
+* Global cooldown bar and remaining time: PASS
+* Selected piece name, type, and cooldown: PASS
+* Enemy team composition: PASS
+* Player King retry returns to Preparation: PASS
+* Retry preserves loadout and enemy setup: PASS
+* Retry starts in first move phase again: PASS
+* Console Error 0
+* Console Warning 0
+* Scene validation issues 0
+
+---
+
 ## Implemented MVP Features
 
 ### Core Gameplay
@@ -207,9 +247,11 @@ Verified:
 
 * Loadout validation
 * Placement validation
-* King requirement
+* Exactly one Player King requirement
 * Cost limit validation
 * Player placement rows
+* Preparation-only placed piece repositioning
+* Retry loadout preservation
 
 ### Enemy Setup
 
@@ -218,10 +260,15 @@ Verified:
 * Pattern B
 * Pattern C
 * Enemy placement validation
+* Retry enemy setup preservation
+* Same encounter respawn
 
 ### Enemy AI
 
 * Automatic enemy movement during Playing
+* First Move Phase activation gate
+* Enemy AI inactive before first successful player move
+* Retry resets First Move Phase
 * Player King immediate capture priority
 * Opening Enemy Pawn movement priority
 * Highest-value capture selection
@@ -266,6 +313,23 @@ Current AI priority:
 * Global cooldown display
 * Result banner
 * Prototype setup/reset buttons
+* Title and result screen flow
+* First move phase notice
+* Global cooldown progress bar
+* Selected piece information
+* Enemy team composition
+* Enemy AI activation status
+
+### Retry Flow
+
+* Player King capture reduces HP
+* HP above 0 returns to Preparation
+* Selected loadout remains intact
+* Active enemy setup remains intact
+* Runtime pieces and board occupancy are cleared
+* Selection, highlights, and cooldowns are reset
+* Same enemy encounter is used for the next attempt
+* HP 0 transitions to GameOver
 
 ---
 
@@ -307,7 +371,7 @@ Not implemented:
 * Advanced input architecture
 * Keyboard navigation
 * Advanced UI screens
-* Cooldown bars
+* Per-piece cooldown bars
 * Sound
 * Animation
 * VFX
@@ -317,7 +381,7 @@ Not implemented:
 
 ## Next Development Target
 
-The next implementation target is not defined in the current source-of-truth documents.
+Prompt07: Stage Structure
 
 Do not implement in advance:
 
@@ -358,7 +422,8 @@ The following documents should always be provided together when continuing devel
 6. Prompt03_Implementation_Summary.md
 7. Prompt04_Implementation_Summary.md
 8. Prompt05_Implementation_Summary.md
-9. Current Prompt Document
+9. Prompt06_Implementation_Summary.md
+10. Current Prompt Document
 
 These documents collectively serve as the project's source of truth.
 
@@ -366,7 +431,7 @@ These documents collectively serve as the project's source of truth.
 
 ## Existing Systems Protection
 
-Prompt01, Prompt02, Prompt03, Prompt04, and Prompt05 are complete and accepted.
+Prompt01, Prompt02, Prompt03, Prompt04, Prompt05, and Prompt06 are complete and accepted.
 
 Unless a minimal integration change is strictly required, do not rewrite, replace, or refactor the following systems:
 

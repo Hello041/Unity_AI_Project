@@ -30,7 +30,20 @@ namespace TacticalRoguelike.Gameplay.Stage
 
         public int SpawnedEnemyCount
         {
-            get { return spawnedEnemies.Count; }
+            get
+            {
+                int activeCount = 0;
+                for (int i = 0; i < spawnedEnemies.Count; i++)
+                {
+                    PieceController enemy = spawnedEnemies[i];
+                    if (enemy != null && !enemy.IsCaptured)
+                    {
+                        activeCount++;
+                    }
+                }
+
+                return activeCount;
+            }
         }
 
         private void Awake()
@@ -84,18 +97,10 @@ namespace TacticalRoguelike.Gameplay.Stage
             return true;
         }
 
-        public void ClearSpawnedEnemies()
+public void ClearSpawnedEnemies()
         {
-            for (int i = spawnedEnemies.Count - 1; i >= 0; i--)
-            {
-                PieceController enemy = spawnedEnemies[i];
-                if (enemy != null)
-                {
-                    DestroyImmediate(enemy.gameObject);
-                }
-            }
-
-            spawnedEnemies.Clear();
+            ClearSpawnedEnemyInstances();
+            activeSetup = null;
         }
 
         private bool TrySpawnEnemy(EnemySpawnEntry entry)
@@ -190,5 +195,26 @@ namespace TacticalRoguelike.Gameplay.Stage
                 piecesRoot = rootObject.transform;
             }
         }
-    }
+    
+
+private void ClearSpawnedEnemyInstances()
+        {
+            for (int i = spawnedEnemies.Count - 1; i >= 0; i--)
+            {
+                PieceController enemy = spawnedEnemies[i];
+                if (enemy != null)
+                {
+                    DestroyImmediate(enemy.gameObject);
+                }
+            }
+
+            spawnedEnemies.Clear();
+        }
+
+
+public void ClearSpawnedEnemiesForRetry()
+        {
+            ClearSpawnedEnemyInstances();
+        }
+}
 }

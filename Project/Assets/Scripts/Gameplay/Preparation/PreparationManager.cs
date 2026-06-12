@@ -59,13 +59,19 @@ namespace TacticalRoguelike.Gameplay.Preparation
             EnsureReferences();
         }
 
-        public bool TryAddPieceToLoadout(PieceDefinition pieceDefinition)
+public bool TryAddPieceToLoadout(PieceDefinition pieceDefinition)
         {
             EnsureReferences();
 
             if (pieceDefinition == null)
             {
                 Debug.LogWarning("Cannot add a null piece to loadout.");
+                return false;
+            }
+
+            if (pieceDefinition.PieceType == PieceType.King && CountSelectedPieces(PieceType.King) >= 1)
+            {
+                Debug.LogWarning("Exactly one Player King is allowed.");
                 return false;
             }
 
@@ -100,6 +106,13 @@ namespace TacticalRoguelike.Gameplay.Preparation
             ClearPlacedPieces();
             PublishLoadoutChanged(null);
         }
+
+public void ClearPlacedPiecesForRetry()
+        {
+            ClearPlacedPieces();
+            PublishLoadoutChanged(null);
+        }
+
 
         public bool TryPlaceSelectedPiece(int loadoutIndex, GridPosition position)
         {
@@ -142,9 +155,43 @@ namespace TacticalRoguelike.Gameplay.Preparation
             return true;
         }
 
-        public bool CanStartBattle()
+public bool TryRepositionPlacedPiece(PieceController piece, GridPosition targetPosition)
         {
-            return HasRequiredKing()
+            EnsureReferences();
+
+            if (gameManager == null || gameManager.CurrentState != GameState.Preparation)
+            {
+                return false;
+            }
+
+            if (piece == null || piece.Owner != PieceOwner.Player || !placedPieces.Contains(piece))
+            {
+                return false;
+            }
+
+            if (piece.GridPosition == targetPosition)
+            {
+                return true;
+            }
+
+            string reason;
+            if (!placementValidator.CanPlace(PieceOwner.Player, targetPosition, out reason))
+            {
+                PublishPlacement(piece.Definition, PieceOwner.Player, targetPosition, false, reason);
+                return false;
+            }
+
+            bool moved = piece.TryMoveTo(targetPosition);
+            PublishPlacement(piece.Definition, PieceOwner.Player, targetPosition, moved,
+                moved ? "Piece repositioned." : "Piece reposition failed.");
+            return moved;
+        }
+
+
+public bool CanStartBattle()
+        {
+            return CountSelectedPieces(PieceType.King) == 1
+                && CountPlacedPieces(PieceType.King) == 1
                 && selectedLoadout.Count > 0
                 && placedPieces.Count == selectedLoadout.Count
                 && CurrentCost <= maxLoadoutCost;
@@ -313,5 +360,56 @@ private bool IsLoadoutIndexAlreadyPlaced(int loadoutIndex)
                 piecesRoot = rootObject.transform;
             }
         }
-    }
+    
+
+private int CountPlacedPieces(PieceType pieceType)
+        {
+            int count = 0;
+            for (int i = 0; i < placedPieces.Count; i++)
+            {
+                PieceController piece = placedPieces[i];
+                if (piece != null && !piece.IsCaptured && piece.Definition != null && piece.Definition.PieceType == pieceType)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+
+private int CountSelectedPieces(PieceType pieceType)
+        {
+            int count = 0;
+            for (int i = 0; i < selectedLoadout.Count; i++)
+            {
+                PieceDefinition piece = selectedLoadout[i];
+                if (piece != null && piece.PieceType == pieceType)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+
+public int FindFirstUnplacedLoadoutIndex(PieceDefinition pieceDefinition)
+        {
+            if (pieceDefinition == null)
+            {
+                return -1;
+            }
+
+            for (int i = 0; i < selectedLoadout.Count; i++)
+            {
+                if (!IsLoadoutIndexAlreadyPlaced(i) && selectedLoadout[i] == pieceDefinition)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+}
 }

@@ -6,7 +6,7 @@ Current scene:
 Assets/Scenes/SampleScene.unity
 ```
 
-This document reflects the current implemented MVP state after Prompt05.
+This document reflects the current implemented MVP state after Prompt06 completion.
 
 ## SampleScene Root Hierarchy
 
@@ -98,10 +98,11 @@ Transitions through Boot, StageStart, Preparation, Playing, StageClear, and Game
 Implemented flow:
 
 ```txt
-Boot
+Boot / Title
 → StageStart
 → Preparation
-→ Playing
+→ Playing / First Move Phase
+→ Playing / Enemy AI Active
 → StageClear / GameOver
 ```
 
@@ -113,6 +114,17 @@ StartPreparation()
 StartBattle()
 NotifyEnemyKingCaptured()
 NotifyPlayerKingCaptured()
+```
+
+Player King capture retry:
+
+```txt
+Playing + Player King Captured
+→ HP -1
+→ HP > 0
+→ Preparation
+→ Preserve selected loadout
+→ Preserve active enemy setup
 ```
 
 ### BoardRoot
@@ -206,6 +218,9 @@ Requires King.
 Prevents placement overlap.
 Restricts player placement to bottom two rows.
 Calls GameManager.StartBattle() only when preparation is valid.
+Requires exactly one selected and placed Player King.
+Allows placed player pieces to be repositioned during Preparation.
+Preserves the selected loadout after a non-terminal Player King capture.
 ```
 
 Current MVP loadout example:
@@ -310,6 +325,8 @@ Purpose:
 
 ```txt
 Chooses and spawns lightweight enemy setup patterns.
+Preserves ActiveSetup during a Player King capture retry.
+Respawns the same encounter when the next retry battle begins.
 ```
 
 Current enemy patterns:
@@ -340,6 +357,7 @@ Purpose:
 
 ```txt
 Provides editor-testable prototype controls and status display.
+Provides Title, Preparation, Playing, and Result state presentation.
 ```
 
 HUD displays:
@@ -354,11 +372,17 @@ Enemy setup name
 Enemy count
 Global cooldown remaining time
 StageClear / GameOver result banner
+First move battle notice
+Global cooldown progress bar
+Selected piece name, type, and cooldown
+Enemy team composition
+Enemy AI waiting / active state
 ```
 
 HUD buttons:
 
 ```txt
+Start Game
 King
 Rook
 Knight
@@ -366,7 +390,9 @@ Pawn
 Setup Player MVP
 Spawn Random Enemies
 Start Battle
-Reset Prototype
+Reset Preparation
+Restart
+Return to Title
 ```
 
 ### EnemyAIRoot
@@ -395,6 +421,28 @@ Prefer random movement by non-King enemy pieces.
 Use Enemy King movement only as fallback unless it can capture Player King.
 Wait if no valid movement exists.
 ```
+
+First move phase:
+
+```txt
+Start Battle
+→ Enemy AI remains inactive
+→ Player completes first successful move
+→ First move notice is removed
+→ Enemy AI becomes active
+```
+
+The first move phase is reset after a Player King capture retry.
+
+First move activation source:
+
+```txt
+PieceActionController.OnPieceMoved
+→ Successful Player move
+→ EnemyAIController releases first-move gate
+```
+
+Invalid movement attempts and elapsed time do not release the gate.
 
 ## Runtime Object Creation
 
@@ -481,17 +529,20 @@ Recommended editor flow:
 
 ```txt
 1. Enter Play Mode
-2. Confirm state is Preparation
-3. Click Setup Player MVP
-4. Click Spawn Random Enemies
-5. Click Start Battle
-6. Observe enemy AI movement during Playing
-7. Click a player piece to select it
-8. Confirm selected, valid movement, and capture highlights
-9. Click a valid destination to move or capture
-10. Capture Enemy King to reach StageClear
-11. Allow Player King capture enough times to reach GameOver
-12. Reset Prototype to replay
+2. Confirm the Title screen is visible
+3. Click Start Game and confirm Preparation
+4. Click Setup Player MVP
+5. Click Spawn Random Enemies
+6. Click Start Battle
+7. Confirm the First Move Notice and Enemy AI waiting state
+8. Confirm Enemy AI does not move before a successful player move
+9. Click a player piece and confirm selected piece information
+10. Click a valid destination to complete the first move
+11. Confirm the notice disappears and Enemy AI becomes active
+12. Confirm the global cooldown bar updates
+13. Capture Enemy King to reach StageClear
+14. Allow Player King capture to verify retry and GameOver flows
+15. Use Restart or Return to Title to replay
 ```
 
 Current verified results:
@@ -520,6 +571,15 @@ StageClear blocks further player interaction
 Enemy King capture reaches StageClear
 Player King capture damages player HP
 Cooldowns start after successful movement
+Enemy AI does not move before the first successful player move
+Invalid player movement does not end the first move phase
+First successful player movement enables Enemy AI
+First move notice is visible only while Enemy AI is gated
+Global cooldown progress is visible during Playing
+Selected player piece information updates during Playing
+Enemy composition matches the active enemy setup
+Player King retry preserves loadout and enemy setup
+Player King retry returns to the first move phase
 ```
 
 ## Known Scene Limitations
@@ -532,7 +592,7 @@ Touch controls
 Advanced input architecture
 Keyboard navigation
 Advanced UI screens
-Cooldown bars
+Per-piece cooldown bars
 Sound
 Animation
 VFX

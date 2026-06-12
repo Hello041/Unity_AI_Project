@@ -28,13 +28,92 @@ namespace TacticalRoguelike.Gameplay.EnemyAI
         private bool logActions = true;
 
         private readonly EnemyMoveSelector moveSelector = new EnemyMoveSelector();
+        private bool waitingForPlayerFirstMove = true;
         private bool wasPlaying;
+
+        public bool IsWaitingForPlayerFirstMove
+        {
+            get { return waitingForPlayerFirstMove; }
+        }
 
         private void Awake()
         {
             EnsureReferences();
         }
 
+private void OnEnable()
+        {
+            EnsureReferences();
+
+            if (gameManager != null)
+            {
+                gameManager.OnBattleStarted += HandleBattleStarted;
+                gameManager.OnBattleResetRequested += HandleBattleResetRequested;
+            }
+
+            if (pieceActionController != null)
+            {
+                pieceActionController.OnPieceMoved += HandlePieceMoved;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (gameManager != null)
+            {
+                gameManager.OnBattleStarted -= HandleBattleStarted;
+                gameManager.OnBattleResetRequested -= HandleBattleResetRequested;
+            }
+
+            if (pieceActionController != null)
+            {
+                pieceActionController.OnPieceMoved -= HandlePieceMoved;
+            }
+        }
+
+private void HandleBattleStarted(StageEventData data)
+        {
+            waitingForPlayerFirstMove = true;
+            wasPlaying = false;
+            moveSelector.ResetOpeningMemory();
+
+            if (actionDelay != null)
+            {
+                actionDelay.Reset();
+            }
+        }
+
+        private void HandleBattleResetRequested(StageEventData data)
+        {
+            waitingForPlayerFirstMove = true;
+            wasPlaying = false;
+
+            if (actionDelay != null)
+            {
+                actionDelay.Reset();
+            }
+        }
+
+        private void HandlePieceMoved(PieceController piece, GridPosition targetPosition)
+        {
+            if (!waitingForPlayerFirstMove
+                || piece == null
+                || piece.Owner != PieceOwner.Player
+                || gameManager == null
+                || gameManager.CurrentState != GameState.Playing)
+            {
+                return;
+            }
+
+            waitingForPlayerFirstMove = false;
+
+            if (actionDelay != null)
+            {
+                actionDelay.TriggerSoon();
+            }
+        }
+
+        
 private void Update()
         {
             EnsureReferences();
@@ -53,6 +132,12 @@ private void Update()
                 }
 
                 wasPlaying = false;
+                return;
+            }
+
+            if (waitingForPlayerFirstMove)
+            {
+                wasPlaying = true;
                 return;
             }
 
@@ -80,7 +165,9 @@ private void Update()
         {
             EnsureReferences();
 
-            if (gameManager == null || gameManager.CurrentState != GameState.Playing)
+            if (waitingForPlayerFirstMove
+                || gameManager == null
+                || gameManager.CurrentState != GameState.Playing)
             {
                 return;
             }

@@ -20,7 +20,7 @@ namespace TacticalRoguelike.Core
         private StageDefinition stageDefinition;
 
         [SerializeField]
-        private bool autoEnterPreparationOnStart = true;
+        private bool autoEnterPreparationOnStart = false;
 
         private GameState currentState = GameState.Boot;
 
@@ -28,7 +28,9 @@ namespace TacticalRoguelike.Core
         public event Action<StageEventData> OnPreparationStarted;
         public event Action<StageEventData> OnBattleStarted;
         public event Action<StageEventData> OnStageCleared;
-        public event Action<StageEventData> OnGameOver;
+        
+        public event Action<StageEventData> OnBattleResetRequested;
+public event Action<StageEventData> OnGameOver;
         public event Action<GameState> OnStateChanged;
 
         public GameState CurrentState
@@ -147,6 +149,14 @@ public void NotifyPlayerKingCaptured()
             }
 
             playerHealthService.TakeDamage();
+            if (playerHealthService.IsDepleted || currentState == GameState.GameOver)
+            {
+                return;
+            }
+
+            ChangeState(GameState.Preparation);
+            PublishStageEvent(OnBattleResetRequested, "Player king captured. Resetting battle to Preparation.");
+            PublishStageEvent(OnPreparationStarted, "Preparation restarted after Player King capture.");
         }
 
         [ContextMenu("Debug/Start Battle")]

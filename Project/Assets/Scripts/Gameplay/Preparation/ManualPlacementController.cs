@@ -15,10 +15,18 @@ namespace TacticalRoguelike.Gameplay.Preparation
         [SerializeField]
         private BoardManager boardManager;
 
-        private PieceDefinition selectedPieceDefinition;
+        
+        private PieceController selectedPlacedPiece;
+private PieceDefinition selectedPieceDefinition;
         private string lastMessage = "Select a piece.";
 
-        public PieceDefinition SelectedPieceDefinition
+        
+
+        public PieceController SelectedPlacedPiece
+        {
+            get { return selectedPlacedPiece; }
+        }
+public PieceDefinition SelectedPieceDefinition
         {
             get { return selectedPieceDefinition; }
         }
@@ -33,9 +41,10 @@ namespace TacticalRoguelike.Gameplay.Preparation
             EnsureReferences();
         }
 
-        public void SelectPieceForPlacement(PieceDefinition pieceDefinition)
+public void SelectPieceForPlacement(PieceDefinition pieceDefinition)
         {
             EnsureReferences();
+            selectedPlacedPiece = null;
             selectedPieceDefinition = pieceDefinition;
 
             if (selectedPieceDefinition == null)
@@ -48,32 +57,78 @@ namespace TacticalRoguelike.Gameplay.Preparation
             HighlightPlayerRows();
         }
 
-        public bool HandleTileClicked(GridPosition position)
+public bool HandleTileClicked(GridPosition position)
         {
             EnsureReferences();
 
+            if (preparationManager == null || boardManager == null)
+            {
+                lastMessage = "Preparation references missing.";
+                return false;
+            }
+
+            PieceController clickedPiece = boardManager.GetOccupant(position) as PieceController;
+            if (clickedPiece != null && clickedPiece.Owner == PieceOwner.Player)
+            {
+                selectedPieceDefinition = null;
+                selectedPlacedPiece = clickedPiece;
+                lastMessage = "Selected placed " + clickedPiece.Definition.DisplayName + ". Click an empty player row tile.";
+                HighlightPlayerRows();
+                return true;
+            }
+
+            if (selectedPlacedPiece != null)
+            {
+                bool repositioned = preparationManager.TryRepositionPlacedPiece(selectedPlacedPiece, position);
+                lastMessage = repositioned
+                    ? "Repositioned " + selectedPlacedPiece.Definition.DisplayName + " to " + position + "."
+                    : "Cannot reposition piece to " + position + ".";
+
+                if (repositioned)
+                {
+                    selectedPlacedPiece = null;
+                    if (boardView != null)
+                    {
+                        boardView.ClearHighlights();
+                    }
+                }
+                else
+                {
+                    HighlightPlayerRows();
+                }
+
+                return repositioned;
+            }
+
             if (selectedPieceDefinition == null)
             {
-                lastMessage = "Select a piece first.";
+                lastMessage = "Select a piece first, or click a placed piece to reposition it.";
                 return false;
             }
 
-            if (preparationManager == null)
+            int loadoutIndex = preparationManager.FindFirstUnplacedLoadoutIndex(selectedPieceDefinition);
+            bool addedNewPiece = false;
+            if (loadoutIndex < 0)
             {
-                lastMessage = "PreparationManager missing.";
-                return false;
+                if (!preparationManager.TryAddPieceToLoadout(selectedPieceDefinition))
+                {
+                    lastMessage = selectedPieceDefinition.PieceType == PieceType.King
+                        ? "Only one Player King is allowed."
+                        : "Cannot add piece to loadout.";
+                    return false;
+                }
+
+                loadoutIndex = preparationManager.SelectedCount - 1;
+                addedNewPiece = true;
             }
 
-            if (!preparationManager.TryAddPieceToLoadout(selectedPieceDefinition))
-            {
-                lastMessage = "Cannot add piece to loadout.";
-                return false;
-            }
-
-            int loadoutIndex = preparationManager.SelectedCount - 1;
             if (!preparationManager.TryPlaceSelectedPiece(loadoutIndex, position))
             {
-                preparationManager.TryRemoveLastPieceFromLoadout();
+                if (addedNewPiece)
+                {
+                    preparationManager.TryRemoveLastPieceFromLoadout();
+                }
+
                 lastMessage = "Cannot place " + selectedPieceDefinition.DisplayName + " at " + position + ".";
                 HighlightPlayerRows();
                 return false;
@@ -90,9 +145,10 @@ namespace TacticalRoguelike.Gameplay.Preparation
             return true;
         }
 
-        public void ClearSelection()
+public void ClearSelection()
         {
             selectedPieceDefinition = null;
+            selectedPlacedPiece = null;
             lastMessage = "Selection cleared.";
 
             if (boardView != null)

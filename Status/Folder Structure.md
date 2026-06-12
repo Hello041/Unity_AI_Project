@@ -6,7 +6,7 @@ Current Unity project root:
 C:/Unity_AI_Project/Project
 ```
 
-This document reflects the current implemented MVP state after Prompt05.
+This document reflects the current implemented MVP state after Prompt06 completion.
 
 ## Assets
 
@@ -147,7 +147,13 @@ Assets/
 │  ├─ slice03_pieces_check.png
 │  ├─ slice03_pieces_height_raised.png
 │  ├─ slice09_hud_check.png
-│  └─ slice09_hud_screen_check.png
+│  ├─ slice09_hud_screen_check.png
+│  ├─ prompt06_title_screen.png
+│  ├─ prompt06_preparation_hud.png
+│  ├─ prompt06_stage_clear.png
+│  ├─ prompt06_game_over.png
+│  ├─ prompt06_ux_first_move_verified.png
+│  └─ prompt06_ux_active_hud_final.png
 │
 ├─ Settings/
 │  ├─ DefaultVolumeProfile.asset
@@ -191,6 +197,13 @@ Preparation
 Playing
 StageClear
 GameOver
+```
+
+Prompt06 modification:
+
+```txt
+GameManager publishes a battle reset request when the Player King is captured and HP remains.
+The retry returns to Preparation without resetting stage HP or the selected encounter.
 ```
 
 ### Health
@@ -258,6 +271,7 @@ Mouse position is converted to a board tile through the existing camera and Phys
 Preparation clicks continue to route through ManualPlacementController.
 Playing clicks support player selection, movement, and capture through existing systems.
 Legacy Input Manager support remains available through conditional compilation.
+BoardInputController exposes the current selected player piece for the Prompt06 HUD.
 ```
 
 ### Preparation
@@ -271,6 +285,15 @@ PlacementEventData
 ```
 
 Handles loadout budget, King requirement, placement rows, overlap prevention, and battle start validation.
+
+Prompt06 modifications:
+
+```txt
+Exactly one Player King is allowed.
+Placed player pieces can be repositioned during Preparation.
+The selected loadout is preserved after a non-terminal Player King capture.
+Preserved loadout entries are reused during retry placement.
+```
 
 ### Cooldown
 
@@ -291,6 +314,14 @@ EnemySpawnEntry
 
 Handles simple weighted enemy pattern spawning.
 
+Prompt06 modifications:
+
+```txt
+Enemy runtime instances can be cleared without clearing ActiveSetup.
+The same active setup is respawned for a Player King capture retry.
+SpawnedEnemyCount reflects active, non-captured enemies.
+```
+
 ### Enemy AI
 
 ```txt
@@ -301,6 +332,16 @@ EnemyActionDelay
 ```
 
 Handles lightweight reactive enemy movement during Playing state.
+
+The current controller also owns the lightweight player-first-move gate:
+
+```txt
+Start Battle
+→ Wait for first successful Player move
+→ Enable Enemy AI
+```
+
+Invalid movement attempts and elapsed time do not activate Enemy AI.
 
 Current AI priority:
 
@@ -320,6 +361,34 @@ PrototypeHud
 ```
 
 Handles prototype status display, setup buttons, enemy spawn button, battle start button, reset button, and result banner.
+
+Prompt06 presentation additions:
+
+```txt
+Title screen
+StageClear / GameOver result screen
+Restart and Return to Title
+First move notice
+Global cooldown progress bar
+Selected piece information panel
+Enemy team composition panel
+Battle / Enemy AI status panel
+```
+
+## Prompt06 Modified Files
+
+```txt
+Assets/Scenes/SampleScene.unity
+Assets/Scripts/Core/GameManager.cs
+Assets/Scripts/Gameplay/EnemyAI/EnemyAIController.cs
+Assets/Scripts/Gameplay/Interaction/BoardInputController.cs
+Assets/Scripts/Gameplay/Preparation/ManualPlacementController.cs
+Assets/Scripts/Gameplay/Preparation/PreparationManager.cs
+Assets/Scripts/Gameplay/Stage/EnemySetupManager.cs
+Assets/Scripts/Presentation/PrototypeHud.cs
+```
+
+Prompt06 did not add new C# script files or scene root GameObjects.
 
 ## Current Data Assets
 

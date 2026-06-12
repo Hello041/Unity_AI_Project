@@ -6736,7 +6736,7 @@ MonoBehaviour:
   playerStartingHp: 3
   playerHealthService: {fileID: 1385456176}
   stageDefinition: {fileID: 11400000, guid: 63aecbbb837287547b078fb42914af0a, type: 2}
-  autoEnterPreparationOnStart: 1
+  autoEnterPreparationOnStart: 0
 --- !u!4 &1385456178
 Transform:
   m_ObjectHideFlags: 0
@@ -8735,6 +8735,7 @@ MonoBehaviour:
   boardManager: {fileID: 477954972}
   preparationManager: {fileID: 1770450751}
   manualPlacementController: {fileID: 1770450753}
+  boardInputController: {fileID: 0}
   enemySetupManager: {fileID: 685103087}
   playerGlobalCooldown: {fileID: 860270461}
   piecesRoot: {fileID: 1199621644}
