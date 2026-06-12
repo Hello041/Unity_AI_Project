@@ -4,6 +4,10 @@ using TacticalRoguelike.Gameplay.Board;
 using TacticalRoguelike.Gameplay.Movement;
 using TacticalRoguelike.Gameplay.Preparation;
 using TacticalRoguelike.Gameplay.Pieces;
+
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 using UnityEngine;
 
 namespace TacticalRoguelike.Gameplay.Interaction
@@ -39,10 +43,9 @@ namespace TacticalRoguelike.Gameplay.Interaction
             EnsureReferences();
         }
 
-        private void Update()
+private void Update()
         {
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (!Input.GetMouseButtonDown(0))
+            if (!WasPrimaryPointerPressed())
             {
                 return;
             }
@@ -57,7 +60,6 @@ namespace TacticalRoguelike.Gameplay.Interaction
             {
                 HandleTileClicked(clickedPosition);
             }
-#endif
         }
 
         public void ClearSelection()
@@ -158,7 +160,7 @@ public void HandleTileClicked(GridPosition clickedPosition)
             return false;
         }
 
-        private bool TryGetClickedBoardPosition(out GridPosition position)
+private bool TryGetClickedBoardPosition(out GridPosition position)
         {
             EnsureReferences();
             position = new GridPosition(-1, -1);
@@ -168,7 +170,13 @@ public void HandleTileClicked(GridPosition clickedPosition)
                 return false;
             }
 
-            Ray ray = targetCamera.ScreenPointToRay(Input.mousePosition);
+            Vector2 pointerPosition;
+            if (!TryGetPointerPosition(out pointerPosition))
+            {
+                return false;
+            }
+
+            Ray ray = targetCamera.ScreenPointToRay(pointerPosition);
             RaycastHit hit;
             if (!Physics.Raycast(ray, out hit, 100f))
             {
@@ -222,5 +230,33 @@ private void EnsureReferences()
                 gameManager = FindFirstObjectByType<GameManager>();
             }
         }
-    }
+    
+
+private static bool WasPrimaryPointerPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return Input.GetMouseButtonDown(0);
+#else
+            return false;
+#endif
+        }
+
+        private static bool TryGetPointerPosition(out Vector2 pointerPosition)
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (Mouse.current != null)
+            {
+                pointerPosition = Mouse.current.position.ReadValue();
+                return true;
+            }
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            pointerPosition = Input.mousePosition;
+            return true;
+#endif
+            pointerPosition = default;
+            return false;
+        }
+}
 }

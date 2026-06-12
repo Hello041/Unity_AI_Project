@@ -6,7 +6,7 @@ Current scene:
 Assets/Scenes/SampleScene.unity
 ```
 
-This document reflects the current implemented MVP state after Prompt04.
+This document reflects the current implemented MVP state after Prompt05.
 
 ## SampleScene Root Hierarchy
 
@@ -256,15 +256,23 @@ Executes selected piece movement.
 Handles capture.
 Starts cooldowns after successful movement.
 Notifies GameManager when a King is captured.
-Routes board tile clicks when legacy Input is enabled.
+Reads mouse clicks through the New Input System.
+Raycasts from the camera to BoardTileView colliders.
+Routes Preparation clicks to ManualPlacementController.
+Selects player pieces and displays valid movement or capture highlights during Playing.
+Executes valid destinations through PieceActionController.
 ```
 
 Important current note:
 
 ```txt
 The project uses Input System-only settings.
-BoardInputController legacy Input polling is guarded to prevent runtime exceptions.
-Prototype testing currently relies on PrototypeHud buttons and public methods.
+BoardInputController uses Mouse.current for primary click and pointer position input.
+Gameplay selection and movement input is accepted only during Playing.
+Enemy pieces cannot be selected.
+Invalid destinations keep the current selection and do not start cooldowns.
+Successful moves clear selection and use existing cooldown behavior.
+Legacy Input Manager support remains conditionally available.
 ```
 
 ### CooldownRoot
@@ -478,10 +486,12 @@ Recommended editor flow:
 4. Click Spawn Random Enemies
 5. Click Start Battle
 6. Observe enemy AI movement during Playing
-7. Select or invoke player piece movement through prototype methods
-8. Capture Enemy King to reach StageClear
-9. Capture Player King enough times to reach GameOver
-10. Reset Prototype to replay
+7. Click a player piece to select it
+8. Confirm selected, valid movement, and capture highlights
+9. Click a valid destination to move or capture
+10. Capture Enemy King to reach StageClear
+11. Allow Player King capture enough times to reach GameOver
+12. Reset Prototype to replay
 ```
 
 Current verified results:
@@ -499,6 +509,14 @@ Enemy AI can capture player pieces
 Enemy AI prioritizes Player King capture
 Enemy AI moves Enemy Pawns once during opening when possible
 Enemy AI reduces early Enemy King aggression
+Player pieces can be selected with the mouse
+Enemy pieces cannot be selected
+Selected tiles display selection feedback
+Valid movement and capture destinations display highlights
+Invalid destinations do not move the selected piece
+Valid destinations execute movement
+Player movement starts individual and global cooldowns
+StageClear blocks further player interaction
 Enemy King capture reaches StageClear
 Player King capture damages player HP
 Cooldowns start after successful movement
@@ -509,8 +527,10 @@ Cooldowns start after successful movement
 Not implemented in scene:
 
 ```txt
-Full mouse input with New Input System
 Drag-and-drop placement
+Touch controls
+Advanced input architecture
+Keyboard navigation
 Advanced UI screens
 Cooldown bars
 Sound

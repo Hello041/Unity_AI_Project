@@ -8,7 +8,7 @@ Unity 6.3 LTS (6000.3.11f1)
 
 Current Development Stage:
 
-After Prompt04 Completion
+After Prompt05 Completion
 
 ---
 
@@ -115,6 +115,43 @@ Verified:
 
 ---
 
+### Prompt05
+
+Player Input and Playable Interaction Vertical Slice
+
+Completed:
+
+* New Input System mouse click support
+* Board tile raycast input
+* Player piece selection
+* Enemy piece selection rejection
+* Selected piece highlight
+* Valid movement highlight
+* Capture target highlight
+* Player move execution through PieceActionController
+* Existing capture flow integration
+* Existing cooldown integration
+* Playing-state input restriction
+* Legacy Input Manager compatibility fallback
+
+Verified:
+
+* Player piece selection: PASS
+* Enemy piece selection rejection: PASS
+* Selected tile highlight: PASS
+* Valid movement highlight: PASS
+* Invalid destination rejection: PASS
+* Valid destination movement: PASS
+* Piece cooldown integration: PASS
+* Player global cooldown integration: PASS
+* StageClear input restriction: PASS
+* Compile-safe
+* Editor-testable
+* Console Error 0 after clearing MCP transport-only logs
+* Console Warning 0
+
+---
+
 ## Implemented MVP Features
 
 ### Core Gameplay
@@ -204,6 +241,21 @@ Current AI priority:
 6. Wait if no valid movement exists
 ```
 
+### Player Input
+
+* New Input System mouse click support
+* Camera raycast board tile detection
+* Player piece selection
+* Enemy piece selection rejection
+* Selected tile highlight
+* Valid movement highlight
+* Capture target highlight
+* Invalid destination rejection
+* Movement and capture through PieceActionController
+* Existing individual and global cooldown integration
+* Gameplay input restricted to Playing
+* StageClear and GameOver input blocking
+
 ### Presentation
 
 * Prototype HUD
@@ -250,8 +302,10 @@ Not implemented:
 
 Not implemented:
 
-* Full mouse input with New Input System
 * Drag-and-drop placement
+* Touch controls
+* Advanced input architecture
+* Keyboard navigation
 * Advanced UI screens
 * Cooldown bars
 * Sound
@@ -263,21 +317,7 @@ Not implemented:
 
 ## Next Development Target
 
-Prompt05
-
-Recommended focus:
-
-```txt
-Player Input and Playable Interaction
-```
-
-Likely target areas:
-
-* New Input System board clicking
-* Player piece selection usability
-* Player move execution through existing PieceActionController
-* Clearer playable interaction flow
-* Prototype HUD feedback improvements if required
+The next implementation target is not defined in the current source-of-truth documents.
 
 Do not implement in advance:
 
@@ -317,7 +357,8 @@ The following documents should always be provided together when continuing devel
 5. Prompt02 Implementation Summary.md
 6. Prompt03_Implementation_Summary.md
 7. Prompt04_Implementation_Summary.md
-8. Current Prompt Document
+8. Prompt05_Implementation_Summary.md
+9. Current Prompt Document
 
 These documents collectively serve as the project's source of truth.
 
@@ -325,7 +366,7 @@ These documents collectively serve as the project's source of truth.
 
 ## Existing Systems Protection
 
-Prompt01, Prompt02, Prompt03, and Prompt04 are complete and accepted.
+Prompt01, Prompt02, Prompt03, Prompt04, and Prompt05 are complete and accepted.
 
 Unless a minimal integration change is strictly required, do not rewrite, replace, or refactor the following systems:
 

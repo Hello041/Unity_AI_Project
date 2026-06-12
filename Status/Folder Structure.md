@@ -6,7 +6,7 @@ Current Unity project root:
 C:/Unity_AI_Project/Project
 ```
 
-This document reflects the current implemented MVP state after Prompt04.
+This document reflects the current implemented MVP state after Prompt05.
 
 ## Assets
 
@@ -253,8 +253,11 @@ Handles selected piece movement, capture, cooldown start, and guarded board clic
 Note:
 
 ```txt
-BoardInputController legacy Input polling is guarded because the project uses Input System-only settings.
-Prototype testing currently uses PrototypeHud buttons and public methods.
+BoardInputController supports New Input System mouse clicks.
+Mouse position is converted to a board tile through the existing camera and Physics raycast.
+Preparation clicks continue to route through ManualPlacementController.
+Playing clicks support player selection, movement, and capture through existing systems.
+Legacy Input Manager support remains available through conditional compilation.
 ```
 
 ### Preparation
@@ -377,6 +380,9 @@ Reward economy
 Campaign progression
 Save / Load
 Full input architecture
+Drag-and-drop interaction
+Touch controls
+Keyboard navigation
 Advanced UI
 VFX
 Sound
