@@ -16,11 +16,14 @@ MonoBehaviour:
   randomWeight: 1
   spawnEntries:
   - pieceDefinition: {fileID: 11400000, guid: b080abf43a99f5f47acc74488417c47a, type: 2}
-    x: 2
-    y: 5
-  - pieceDefinition: {fileID: 11400000, guid: 746ef92da5edb914087d4fb7d0710a4e, type: 2}
     x: 1
     y: 5
+  - pieceDefinition: {fileID: 11400000, guid: 746ef92da5edb914087d4fb7d0710a4e, type: 2}
+    x: 3
+    y: 5
+  - pieceDefinition: {fileID: 11400000, guid: 9c51cfa868939b74ba87ea32655f191d, type: 2}
+    x: 1
+    y: 4
   - pieceDefinition: {fileID: 11400000, guid: 9c51cfa868939b74ba87ea32655f191d, type: 2}
     x: 3
     y: 4

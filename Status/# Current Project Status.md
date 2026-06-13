@@ -8,7 +8,7 @@ Unity 6.3 LTS (6000.3.11f1)
 
 Current Development Stage:
 
-After Prompt07 Completion
+After Prompt08 Completion
 
 ---
 
@@ -232,6 +232,44 @@ Verified:
 
 ---
 
+### Prompt08
+
+Stage Balance and Anti-Instant-Clear Rules
+
+Completed:
+
+* Stage 1 / Stage 2 / Stage 3 loadout cost limits of 3 / 5 / 7
+* Stage-aware Setup Player MVP loadouts
+* Protected-pair Pattern A, Pattern B, and Pattern C encounter data
+* Randomized protected-pair column placement once per new stage
+* Runtime encounter layout cache
+* Retry and Quick Setup layout preservation without reroll
+* Exactly one Enemy King and Pawn-pair spawn validation
+* Preparation HUD loadout cost display using the current stage maximum
+* Direct aligned Rook capture prevention for protected King, Rook, and Knight pieces
+
+Verified:
+
+* Stage 1 quick setup King + Rook: PASS
+* Stage 2 quick setup King + Rook + Knight: PASS
+* Stage 3 quick setup full MVP loadout: PASS
+* Stage 1 and Stage 2 over-budget rejection: PASS
+* Stage 1 King/Pawn and Rook/Pawn pairs: PASS
+* Stage 2 King/Pawn and Knight/Pawn pairs plus extra Pawn: PASS
+* Stage 3 King/Pawn, Rook/Pawn, and Knight/Pawn pairs: PASS
+* All protected pieces require the supporting Pawn to be removed or bypassed: PASS
+* Quick Setup and retry preserve generated coordinates: PASS
+* New stage creates a fresh randomized layout cache: PASS
+* Prompt06 First Move Phase and retry flow: PASS
+* Prompt07 deterministic stage flow and Victory: PASS
+* Script validation errors 0
+* Script validation warnings 0
+* Console Errors 0
+* Console Warnings 0
+* Scene validation issues 0
+
+---
+
 ## Implemented MVP Features
 
 ### Core Gameplay
@@ -287,6 +325,7 @@ Verified:
 ### Preparation
 
 * Loadout validation
+* Stage-based max loadout cost: Stage 1 = 3, Stage 2 = 5, Stage 3 = 7
 * Placement validation
 * Exactly one Player King requirement
 * Cost limit validation
@@ -304,6 +343,11 @@ Verified:
 * Automatic encounter spawn before Preparation
 * Retry enemy setup preservation
 * Same encounter respawn
+* Exactly one Enemy King required per setup
+* Every King, Rook, and Knight requires a supporting Pawn directly below it
+* Protected pairs keep their relationship while their columns are randomized
+* Encounter positions are generated once at stage entry and cached
+* Retry and Quick Setup respawn the cached positions without rerolling
 
 ### Enemy AI
 
@@ -362,6 +406,7 @@ Current AI priority:
 * Enemy team composition
 * Enemy AI activation status
 * Preparation Start Battle button remains visible above expanded stage status
+* Preparation displays `Loadout Cost: current / current stage maximum`
 
 ### Retry Flow
 
@@ -393,6 +438,24 @@ Stage 2 -> PatternB_KingKnightPawnPawn
 Stage 3 -> PatternC_KingRookKnight
 Stage 3 Clear -> Victory
 ```
+
+### Stage Balance
+
+```txt
+Stage 1 Max Cost 3 -> King + Rook
+Stage 2 Max Cost 5 -> King + Rook + Knight
+Stage 3 Max Cost 7 -> King + Rook + Knight + Pawn + Pawn
+```
+
+Protected encounters:
+
+```txt
+Stage 1 -> King/Pawn + Rook/Pawn (4 enemies)
+Stage 2 -> King/Pawn + Knight/Pawn + Extra Pawn (5 enemies)
+Stage 3 -> King/Pawn + Rook/Pawn + Knight/Pawn (6 enemies)
+```
+
+The pair columns are randomized when a new stage begins. The generated layout is cached and reused unchanged for retries and Quick Setup.
 
 ---
 
@@ -487,7 +550,8 @@ The following documents should always be provided together when continuing devel
 8. Prompt05_Implementation_Summary.md
 9. Prompt06_Implementation_Summary.md
 10. Prompt07_Implementation_Summary.md
-11. Current Prompt Document
+11. Prompt08_Implementation_Summary.md
+12. Current Prompt Document
 
 These documents collectively serve as the project's source of truth.
 
@@ -495,7 +559,7 @@ These documents collectively serve as the project's source of truth.
 
 ## Existing Systems Protection
 
-Prompt01, Prompt02, Prompt03, Prompt04, Prompt05, Prompt06, and Prompt07 are complete and accepted.
+Prompt01, Prompt02, Prompt03, Prompt04, Prompt05, Prompt06, Prompt07, and Prompt08 are complete and accepted.
 
 Unless a minimal integration change is strictly required, do not rewrite, replace, or refactor the following systems:
 

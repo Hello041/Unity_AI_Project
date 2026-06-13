@@ -41,7 +41,12 @@ namespace TacticalRoguelike.Gameplay.Preparation
 
         public int MaxLoadoutCost
         {
-            get { return maxLoadoutCost; }
+            get
+            {
+                return gameManager != null && gameManager.CurrentStage > 0
+                    ? gameManager.CurrentStageMaxLoadoutCost
+                    : maxLoadoutCost;
+            }
         }
 
         public int SelectedCount
@@ -75,10 +80,11 @@ public bool TryAddPieceToLoadout(PieceDefinition pieceDefinition)
                 return false;
             }
 
+            int stageMaxCost = MaxLoadoutCost;
             int nextCost = CurrentCost + Mathf.Max(0, pieceDefinition.LoadoutCost);
-            if (nextCost > maxLoadoutCost)
+            if (nextCost > stageMaxCost)
             {
-                Debug.LogWarning("Loadout cost would exceed budget: " + nextCost + "/" + maxLoadoutCost);
+                Debug.LogWarning("Loadout cost would exceed budget: " + nextCost + "/" + stageMaxCost);
                 return false;
             }
 
@@ -194,7 +200,7 @@ public bool CanStartBattle()
                 && CountPlacedPieces(PieceType.King) == 1
                 && selectedLoadout.Count > 0
                 && placedPieces.Count == selectedLoadout.Count
-                && CurrentCost <= maxLoadoutCost;
+                && CurrentCost <= MaxLoadoutCost;
         }
 
 public bool TryStartBattle()
@@ -312,7 +318,7 @@ private bool IsLoadoutIndexAlreadyPlaced(int loadoutIndex)
             Action<LoadoutEventData> handler = OnLoadoutChanged;
             if (handler != null)
             {
-                handler(new LoadoutEventData(changedPiece, CurrentCost, maxLoadoutCost, selectedLoadout.Count, HasRequiredKing()));
+                handler(new LoadoutEventData(changedPiece, CurrentCost, MaxLoadoutCost, selectedLoadout.Count, HasRequiredKing()));
             }
         }
 

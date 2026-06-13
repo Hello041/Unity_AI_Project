@@ -107,35 +107,53 @@ private void OnGUI()
             DrawGameplayHud();
         }
 
-public void SetupPlayerMvpLoadoutAndPlacement()
+        public void SetupPlayerMvpLoadoutAndPlacement()
         {
             EnsureReferences();
-            if (preparationManager == null)
+            if (preparationManager == null || gameManager == null)
             {
-                lastMessage = "PreparationManager missing.";
+                lastMessage = "Preparation setup is unavailable.";
                 return;
             }
 
             preparationManager.ClearPreparation();
-            if (enemySetupManager != null && gameManager != null)
+            if (enemySetupManager != null && enemySetupManager.ActiveSetup != null)
             {
-                enemySetupManager.SpawnSetupForStage(gameManager.CurrentStage);
+                enemySetupManager.RespawnActiveSetup();
             }
 
+            int stage = gameManager.CurrentStage;
             bool added = preparationManager.TryAddPieceToLoadout(kingDefinition)
-                && preparationManager.TryAddPieceToLoadout(rookDefinition)
-                && preparationManager.TryAddPieceToLoadout(knightDefinition)
-                && preparationManager.TryAddPieceToLoadout(pawnDefinition)
-                && preparationManager.TryAddPieceToLoadout(pawnDefinition);
+                && preparationManager.TryAddPieceToLoadout(rookDefinition);
 
-            bool placed = preparationManager.TryPlaceSelectedPiece(0, new GridPosition(2, 0))
-                && preparationManager.TryPlaceSelectedPiece(1, new GridPosition(0, 0))
-                && preparationManager.TryPlaceSelectedPiece(2, new GridPosition(1, 0))
-                && preparationManager.TryPlaceSelectedPiece(3, new GridPosition(3, 1))
-                && preparationManager.TryPlaceSelectedPiece(4, new GridPosition(4, 1));
+            if (added && stage >= 2)
+            {
+                added = preparationManager.TryAddPieceToLoadout(knightDefinition);
+            }
+
+            if (added && stage >= 3)
+            {
+                added = preparationManager.TryAddPieceToLoadout(pawnDefinition)
+                    && preparationManager.TryAddPieceToLoadout(pawnDefinition);
+            }
+
+            bool placed = added
+                && preparationManager.TryPlaceSelectedPiece(0, new GridPosition(2, 0))
+                && preparationManager.TryPlaceSelectedPiece(1, new GridPosition(0, 0));
+
+            if (placed && stage >= 2)
+            {
+                placed = preparationManager.TryPlaceSelectedPiece(2, new GridPosition(1, 0));
+            }
+
+            if (placed && stage >= 3)
+            {
+                placed = preparationManager.TryPlaceSelectedPiece(3, new GridPosition(3, 1))
+                    && preparationManager.TryPlaceSelectedPiece(4, new GridPosition(4, 1));
+            }
 
             lastMessage = added && placed
-                ? "Player MVP loadout placed."
+                ? gameManager.CurrentStageLabel + " player MVP loadout placed."
                 : "Player setup failed.";
         }
 
@@ -170,7 +188,7 @@ public void StartBattle()
             }
 
             if (enemySetupManager.SpawnedEnemyCount == 0
-                && !enemySetupManager.SpawnSetupForStage(gameManager.CurrentStage))
+                && !enemySetupManager.RespawnActiveSetup())
             {
                 lastMessage = "Stage encounter failed to spawn.";
                 return;
@@ -230,7 +248,7 @@ private void DrawStatus()
 
             if (preparationManager != null)
             {
-                GUILayout.Label("Loadout: " + preparationManager.CurrentCost + " / " + preparationManager.MaxLoadoutCost
+                GUILayout.Label("Loadout Cost: " + preparationManager.CurrentCost + " / " + preparationManager.MaxLoadoutCost
                     + " | Placed: " + preparationManager.PlacedCount + " / " + preparationManager.SelectedCount);
             }
 

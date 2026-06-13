@@ -54,6 +54,23 @@ public event Action<StageEventData> OnGameOver;
 
 
 
+
+        public int CurrentStageMaxLoadoutCost
+        {
+            get
+            {
+                switch (currentStage)
+                {
+                    case 1:
+                        return 3;
+                    case 2:
+                        return 5;
+                    case 3:
+                    default:
+                        return 7;
+                }
+            }
+        }
         public int CurrentStage
         {
             get { return currentStage; }

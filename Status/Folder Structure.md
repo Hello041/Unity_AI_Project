@@ -6,7 +6,7 @@ Current Unity project root:
 C:/Unity_AI_Project/Project
 ```
 
-This document reflects the current implemented MVP state after Prompt07 completion.
+This document reflects the current implemented MVP state after Prompt08 completion.
 
 ## Assets
 
@@ -201,6 +201,13 @@ Victory
 GameOver
 ```
 
+Prompt08 modification:
+
+```txt
+GameManager exposes the current stage max loadout cost:
+Stage 1 = 3, Stage 2 = 5, Stage 3 = 7.
+```
+
 Prompt06 modification:
 
 ```txt
@@ -296,6 +303,13 @@ PlacementEventData
 
 Handles loadout budget, King requirement, placement rows, overlap prevention, and battle start validation.
 
+Prompt08 modifications:
+
+```txt
+All loadout cost validation uses the active stage maximum.
+Loadout events and battle-start checks report and enforce the same stage budget.
+```
+
 Prompt06 modifications:
 
 ```txt
@@ -337,6 +351,18 @@ Prompt07 modifications:
 ```txt
 SpawnSetupForStage maps Stage 1, Stage 2, and Stage 3 to fixed patterns.
 The random setup API remains backward compatible but is no longer used by the player workflow.
+```
+
+Prompt08 modifications:
+
+```txt
+Pattern assets define canonical King/Pawn, Rook/Pawn, and Knight/Pawn pairs.
+Each setup must contain exactly one Enemy King.
+Every King, Rook, and Knight must have a Pawn directly below it.
+SpawnSetupForStage randomizes pair columns once for each new stage.
+EnemySetupManager caches the generated EnemySpawnEntry positions.
+RespawnActiveSetup reuses the cached positions for retry and Quick Setup.
+Invalid pair data logs an error and does not spawn.
 ```
 
 ### Enemy AI
@@ -403,6 +429,13 @@ Spawn Random Enemies button removed from the Preparation workflow
 Preparation buttons render before the expanded status block so Start Battle remains visible
 ```
 
+Prompt08 presentation additions:
+
+```txt
+Setup Player MVP selects and places the stage-valid 3 / 5 / 7 cost loadout.
+Preparation displays Loadout Cost using the current stage maximum.
+```
+
 ## Prompt06 Modified Files
 
 ```txt
@@ -413,6 +446,7 @@ Assets/Scripts/Gameplay/Interaction/BoardInputController.cs
 Assets/Scripts/Gameplay/Preparation/ManualPlacementController.cs
 Assets/Scripts/Gameplay/Preparation/PreparationManager.cs
 Assets/Scripts/Gameplay/Stage/EnemySetupManager.cs
+Assets/Scripts/Gameplay/Stage/EnemySpawnEntry.cs
 Assets/Scripts/Presentation/PrototypeHud.cs
 ```
 
@@ -438,6 +472,20 @@ Assets/Scripts/Presentation/PrototypeHud.cs
 
 The post-fix only changed Preparation HUD rendering order.
 
+## Prompt08 Modified Files
+
+```txt
+Assets/Scripts/Core/GameManager.cs
+Assets/Scripts/Gameplay/Preparation/PreparationManager.cs
+Assets/Scripts/Gameplay/Stage/EnemySetupManager.cs
+Assets/Scripts/Presentation/PrototypeHud.cs
+Assets/Data/EnemySetups/PatternA_KingRookPawn.asset
+Assets/Data/EnemySetups/PatternB_KingKnightPawnPawn.asset
+Assets/Data/EnemySetups/PatternC_KingRookKnight.asset
+```
+
+Prompt08 did not add new C# scripts or scene root GameObjects.
+
 ## Current Data Assets
 
 ### Stage
@@ -462,7 +510,9 @@ King = 0
 Pawn = 1
 Knight = 2
 Rook = 3
-Max Loadout Cost = 7
+Stage 1 Max Loadout Cost = 3
+Stage 2 Max Loadout Cost = 5
+Stage 3 Max Loadout Cost = 7
 ```
 
 ### Enemy Setups
@@ -473,7 +523,25 @@ PatternB_KingKnightPawnPawn
 PatternC_KingRookKnight
 ```
 
-Enemy spawn positions use serialized `x` and `y` fields in `EnemySpawnEntry`, then expose runtime `GridPosition` through a property.
+Enemy setup assets use serialized `x` and `y` fields to define canonical protected pairs. `EnemySpawnEntry.WithPosition(...)` creates runtime entries for randomized columns without modifying the assets.
+
+Current protected structures:
+
+```txt
+PatternA_KingRookPawn:
+King/Pawn + Rook/Pawn
+4 enemies
+
+PatternB_KingKnightPawnPawn:
+King/Pawn + Knight/Pawn + Extra Pawn
+5 enemies
+
+PatternC_KingRookKnight:
+King/Pawn + Rook/Pawn + Knight/Pawn
+6 enemies
+```
+
+Pair columns are randomized only when entering a new stage. The generated layout is cached and reused unchanged during Player King retries and Quick Setup.
 
 ## Out of Current Scope
 

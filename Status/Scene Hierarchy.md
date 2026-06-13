@@ -6,7 +6,7 @@ Current scene:
 Assets/Scenes/SampleScene.unity
 ```
 
-This document reflects the current implemented MVP state after Prompt07 completion.
+This document reflects the current implemented MVP state after Prompt08 completion.
 
 ## SampleScene Root Hierarchy
 
@@ -93,6 +93,7 @@ Purpose:
 Owns core game state flow.
 Owns player health service.
 Transitions through Boot, StageStart, Preparation, Playing, StageClear, Victory, and GameOver.
+Provides the current stage max loadout cost: 3, 5, or 7.
 ```
 
 Implemented flow:
@@ -236,6 +237,16 @@ Current MVP loadout example:
 King + Rook + Knight + Pawn + Pawn = 7
 ```
 
+Prompt08 stage loadouts:
+
+```txt
+Stage 1: King + Rook = 3
+Stage 2: King + Rook + Knight = 5
+Stage 3: King + Rook + Knight + Pawn + Pawn = 7
+```
+
+All Preparation loadout addition and battle-start validation uses the current stage maximum.
+
 ### MovementRoot
 
 Components:
@@ -332,9 +343,10 @@ Purpose:
 
 ```txt
 Chooses and spawns lightweight enemy setup patterns.
-Preserves ActiveSetup during a Player King capture retry.
-Respawns the same encounter when the next retry battle begins.
-Spawns the fixed encounter for the current stage before Preparation begins.
+Generates protected-pair columns once when a new stage begins.
+Caches the generated EnemySpawnEntry positions.
+Preserves ActiveSetup and the generated layout during Player King retries.
+Respawns the exact cached encounter for retry and Quick Setup.
 ```
 
 Current enemy patterns:
@@ -350,7 +362,20 @@ Spawn validation:
 ```txt
 Enemy pieces must be placed in the top two board rows.
 Overlapping enemy placement is rejected.
+Exactly one Enemy King is required.
+Every King, Rook, and Knight requires a Pawn directly below it.
+Protected pairs and extra Pawns must fit in separate available columns.
 ```
+
+Prompt08 protected structures:
+
+```txt
+Stage 1: King/Pawn + Rook/Pawn
+Stage 2: King/Pawn + Knight/Pawn + Extra Pawn
+Stage 3: King/Pawn + Rook/Pawn + Knight/Pawn
+```
+
+Columns are randomized at new-stage generation. Retry and Quick Setup use the cached layout and do not reroll.
 
 ### PrototypeUIRoot
 
@@ -385,6 +410,7 @@ Global cooldown progress bar
 Selected piece name, type, and cooldown
 Enemy team composition
 Enemy AI waiting / active state
+Current stage loadout cost and maximum
 ```
 
 HUD buttons:
@@ -410,6 +436,14 @@ StageClear shows the cleared stage while automatic advancement is pending.
 Victory shows All Stages Cleared with Restart Session and Return To Title.
 The Spawn Random Enemies button is no longer shown.
 Preparation controls render before the expanded status block so Start Battle remains visible.
+```
+
+Prompt08 HUD behavior:
+
+```txt
+Setup Player MVP creates only the valid loadout for the current stage.
+Preparation displays Loadout Cost: current / current stage maximum.
+The Prompt07 button-first order remains unchanged.
 ```
 
 ### EnemyAIRoot
@@ -513,6 +547,7 @@ Created by:
 EnemySetupManager.SpawnRandomSetup()
 EnemySetupManager.SpawnSetup(...)
 EnemySetupManager.SpawnSetupForStage(...)
+EnemySetupManager.RespawnActiveSetup()
 ```
 
 Name pattern:
@@ -548,7 +583,7 @@ Recommended editor flow:
 1. Enter Play Mode
 2. Confirm the Title screen is visible
 3. Click Start Game and confirm Preparation
-4. Confirm Pattern A and its board positions are already visible
+4. Confirm Pattern A protected pairs are already visible in a generated layout
 5. Click Setup Player MVP
 6. Click Start Battle
 7. Confirm the First Move Notice and Enemy AI waiting state
@@ -606,6 +641,17 @@ Start Battle button remains visible during Preparation
 Start Battle enters Playing in Stage 1, Stage 2, and Stage 3
 Each stage begins in the Prompt06 First Move Phase
 Player King retry remains compatible after the HUD visibility fix
+Stage 1 max loadout cost is 3
+Stage 2 max loadout cost is 5
+Stage 3 max loadout cost is 7
+Stage-aware quick setup creates the 3 / 5 / 7 cost loadouts
+Pattern A, Pattern B, and Pattern C pass Enemy King protection validation
+All King, Rook, and Knight pieces have supporting Pawns
+Protected-pair columns vary between new stage generations
+Quick Setup preserves the generated layout and board occupancy
+Player King retry preserves the same generated coordinates
+A new stage creates a fresh layout cache
+An aligned Player Rook targets the supporting Pawn before the protected piece
 ```
 
 ## Known Scene Limitations

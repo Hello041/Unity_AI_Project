@@ -28,5 +28,16 @@ namespace TacticalRoguelike.Gameplay.Stage
         {
             get { return new GridPosition(x, y); }
         }
-    }
+    
+
+        public EnemySpawnEntry WithPosition(GridPosition position)
+        {
+            return new EnemySpawnEntry
+            {
+                pieceDefinition = pieceDefinition,
+                x = position.X,
+                y = position.Y
+            };
+        }
+}
 }
