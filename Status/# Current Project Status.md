@@ -8,7 +8,9 @@ Unity 6.3 LTS (6000.3.11f1)
 
 Current Development Stage:
 
-After Prompt08 Completion
+Feature Complete MVP
+
+Prompt01 through Prompt09 are complete and accepted.
 
 ---
 
@@ -270,6 +272,39 @@ Verified:
 
 ---
 
+### Prompt09
+
+Canvas UI Conversion
+
+Completed:
+
+* CanvasHud presentation layer
+* Canvas-based Title, Preparation, Battle, StageClear, GameOver, and Victory UI
+* King / Rook / Knight / Pawn Preparation buttons
+* Existing manual placement integration
+* Stage, loadout cost, HP, placed count, enemy setup, enemy count, and enemy composition display
+* Global cooldown, Enemy AI status, selected piece, and First Move display
+* Bottom-center main action buttons
+* Information-panel raycast pass-through
+* Player-facing enemy reroll/reset removal
+* PrototypeHud fallback preservation
+
+Verified:
+
+* Manual placement: PASS
+* Setup Player MVP: PASS
+* Start Battle: PASS
+* Board interaction during Preparation and Playing: PASS
+* Prompt08 protected-pair layout cache preservation: PASS
+* StageClear, GameOver, and Victory UI: PASS
+* Retry and stage progression: PASS
+* PrototypeHud fallback: PASS
+* Console Errors 0
+* Console Warnings 0
+* Scene validation issues 0
+
+---
+
 ## Implemented MVP Features
 
 ### Core Gameplay
@@ -391,7 +426,10 @@ Current AI priority:
 
 ### Presentation
 
-* Prototype HUD
+* CanvasHud Canvas UI presentation layer
+* PrototypeHud fallback
+* Canvas UI hides IMGUI while active
+* Title, Preparation, Battle, StageClear, GameOver, and Victory screens
 * State display
 * HP display
 * Loadout display
@@ -407,6 +445,10 @@ Current AI priority:
 * Enemy AI activation status
 * Preparation Start Battle button remains visible above expanded stage status
 * Preparation displays `Loadout Cost: current / current stage maximum`
+* Preparation displays current stage, player HP, placed count, enemy setup, enemy count, and enemy team composition
+* Information-only Canvas graphics do not block board interaction
+* Main Preparation actions render in the bottom-center area
+* Player-facing encounter reroll/reset controls are not available
 
 ### Retry Flow
 
@@ -505,18 +547,47 @@ Not implemented:
 
 ---
 
+## Current Progress
+
+Completed:
+
+* Core architecture
+* Board system
+* Piece system
+* Combat system
+* Cooldown system
+* Enemy AI
+* Preparation phase
+* Placement system
+* Retry system
+* HP system
+* First Move Phase
+* Stage progression
+* Victory state
+* Stage-based loadout limits
+* Protected-pair encounter generation
+* Canvas UI system
+
+Current project status:
+
+```txt
+Feature Complete MVP
+```
+
 ## Next Development Target
 
-No later prompt is approved in the current source-of-truth documents.
+Prompt10 - Final Polish
 
-Do not implement in advance:
+Focus areas:
 
-* Shop
-* Reward systems
-* Campaign progression
-* Save / Load
-* Advanced AI
-* Check / Checkmate
+* Korean localization
+* Selected piece highlight during Preparation
+* Cooldown visualization improvements
+* Final UX polish
+* Final playtesting
+* Submission validation
+
+Do not implement additional gameplay features.
 
 ---
 
@@ -544,14 +615,8 @@ The following documents should always be provided together when continuing devel
 2. Folder Structure.md
 3. Scene Hierarchy.md
 4. # Current Project Status.md
-5. Prompt02 Implementation Summary.md
-6. Prompt03_Implementation_Summary.md
-7. Prompt04_Implementation_Summary.md
-8. Prompt05_Implementation_Summary.md
-9. Prompt06_Implementation_Summary.md
-10. Prompt07_Implementation_Summary.md
-11. Prompt08_Implementation_Summary.md
-12. Current Prompt Document
+5. Prompt09_Implementation_Summary.md
+6. Current Prompt Document
 
 These documents collectively serve as the project's source of truth.
 
@@ -559,7 +624,7 @@ These documents collectively serve as the project's source of truth.
 
 ## Existing Systems Protection
 
-Prompt01, Prompt02, Prompt03, Prompt04, Prompt05, Prompt06, Prompt07, and Prompt08 are complete and accepted.
+Prompt01, Prompt02, Prompt03, Prompt04, Prompt05, Prompt06, Prompt07, Prompt08, and Prompt09 are complete and accepted.
 
 Unless a minimal integration change is strictly required, do not rewrite, replace, or refactor the following systems:
 
@@ -633,5 +698,6 @@ Unless a minimal integration change is strictly required, do not rewrite, replac
 ### Presentation
 
 * PrototypeHud
+* CanvasHud
 
 Refactoring is only allowed when required for direct integration with future prompts and must remain minimal, compile-safe, and backward compatible.

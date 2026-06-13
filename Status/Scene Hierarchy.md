@@ -6,7 +6,7 @@ Current scene:
 Assets/Scenes/SampleScene.unity
 ```
 
-This document reflects the current implemented MVP state after Prompt08 completion.
+This document reflects the Feature Complete MVP state after Prompt09 completion.
 
 ## SampleScene Root Hierarchy
 
@@ -24,7 +24,8 @@ SampleScene
 ├─ CooldownRoot
 ├─ EnemySetupRoot
 ├─ PrototypeUIRoot
-└─ EnemyAIRoot
+├─ EnemyAIRoot
+└─ CanvasUIRoot
 ```
 
 ## Root Objects and Components
@@ -423,7 +424,6 @@ Knight
 Pawn
 Setup Player MVP
 Start Battle
-Reset Preparation
 Restart Session
 Return to Title
 ```
@@ -444,6 +444,81 @@ Prompt08 HUD behavior:
 Setup Player MVP creates only the valid loadout for the current stage.
 Preparation displays Loadout Cost: current / current stage maximum.
 The Prompt07 button-first order remains unchanged.
+```
+
+Prompt09 fallback behavior:
+
+```txt
+PrototypeHud remains attached as an IMGUI fallback.
+CanvasHud hides PrototypeHud while the Canvas UI is active.
+PrototypeHud can be re-enabled if Canvas UI is unavailable.
+No player-facing enemy reroll or Preparation reset control is exposed.
+```
+
+### CanvasUIRoot
+
+Components:
+
+```txt
+RectTransform
+CanvasHud
+Canvas
+CanvasScaler
+GraphicRaycaster
+```
+
+Purpose:
+
+```txt
+Provides the active Canvas presentation layer.
+Reads state from GameManager, PreparationManager, ManualPlacementController,
+BoardInputController, EnemySetupManager, PlayerGlobalCooldown, and EnemyAIController.
+Delegates existing actions without owning gameplay state.
+Creates the Canvas UI hierarchy and EventSystem support at runtime.
+```
+
+Canvas screens:
+
+```txt
+Title
+Preparation
+Battle
+StageClear
+GameOver
+Victory
+```
+
+Preparation UI:
+
+```txt
+Current Stage
+Loadout Cost
+Player HP
+Placed player piece count
+Enemy setup name
+Enemy count
+Enemy team composition
+King / Rook / Knight / Pawn buttons
+Setup Player MVP
+Start Battle
+```
+
+Battle UI:
+
+```txt
+Stage and enemy team information
+Global cooldown bar
+Battle and Enemy AI status
+Selected piece information
+First Move notice
+```
+
+Raycast behavior:
+
+```txt
+Only actual buttons receive UI raycasts.
+Information panels, text, and cooldown graphics do not block board clicks.
+Main Preparation actions are placed in the bottom-center area.
 ```
 
 ### EnemyAIRoot
@@ -539,6 +614,17 @@ Name pattern:
 Player_{DisplayName}_{LoadoutIndex}
 ```
 
+Canvas manual placement route:
+
+```txt
+Canvas King / Rook / Knight / Pawn button
+→ PrototypeHud public selection command
+→ ManualPlacementController.SelectPieceForPlacement(...)
+→ BoardInputController Preparation click
+→ ManualPlacementController.HandleTileClicked(...)
+→ PreparationManager placement API
+```
+
 ### Enemy Pieces
 
 Created by:
@@ -599,7 +685,8 @@ Current verified results:
 
 ```txt
 Board appears in Play Mode
-Prototype HUD appears in Play Mode
+Canvas UI appears in Play Mode
+Prototype HUD remains available as fallback
 Player MVP setup places pieces on valid rows
 Stage enemy setup automatically places enemies on top rows before Preparation
 2D sprite pieces appear above the 3D board
@@ -652,6 +739,11 @@ Quick Setup preserves the generated layout and board occupancy
 Player King retry preserves the same generated coordinates
 A new stage creates a fresh layout cache
 An aligned Player Rook targets the supporting Pawn before the protected piece
+Preparation Canvas displays stage, loadout, HP, placed count, enemy setup, enemy count, and composition
+Canvas manual piece selection and placement work through existing systems
+Canvas information panels do not block board interaction
+No player-facing enemy reroll/reset control exists
+StageClear, GameOver, and Victory Canvas screens work
 ```
 
 ## Known Scene Limitations

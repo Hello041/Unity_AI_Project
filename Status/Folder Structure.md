@@ -6,7 +6,7 @@ Current Unity project root:
 C:/Unity_AI_Project/Project
 ```
 
-This document reflects the current implemented MVP state after Prompt08 completion.
+This document reflects the Feature Complete MVP state after Prompt09 completion.
 
 ## Assets
 
@@ -94,6 +94,7 @@ Assets/
 │  │     └─ EnemyActionDelay.cs
 │  │
 │  └─ Presentation/
+│     ├─ CanvasHud.cs
 │     └─ PrototypeHud.cs
 │
 ├─ Sprite/
@@ -400,10 +401,13 @@ Current AI priority:
 ### Presentation
 
 ```txt
+CanvasHud
 PrototypeHud
 ```
 
-Handles prototype status display, setup controls, battle start, reset controls, and result presentation.
+`CanvasHud` provides the active Canvas-based Title, Preparation, Battle, and Result presentation. It reads existing systems and delegates commands through established public APIs without owning gameplay state.
+
+`PrototypeHud` remains available as the IMGUI fallback. Canvas UI hides it while active and restores it if the Canvas UI is unavailable.
 
 Prompt06 presentation additions:
 
@@ -434,6 +438,20 @@ Prompt08 presentation additions:
 ```txt
 Setup Player MVP selects and places the stage-valid 3 / 5 / 7 cost loadout.
 Preparation displays Loadout Cost using the current stage maximum.
+```
+
+Prompt09 presentation additions:
+
+```txt
+Canvas-based Title, Preparation, Battle, StageClear, GameOver, and Victory UI
+King / Rook / Knight / Pawn Preparation selection buttons
+Manual placement through existing placement systems
+Stage, loadout cost, HP, placed count, enemy setup, enemy count, and enemy team composition
+Global cooldown, Enemy AI status, selected piece, and First Move display
+Bottom-center Preparation actions
+Information graphics with raycast disabled
+No player-facing enemy reroll or Preparation reset control
+PrototypeHud fallback
 ```
 
 ## Prompt06 Modified Files
@@ -485,6 +503,23 @@ Assets/Data/EnemySetups/PatternC_KingRookKnight.asset
 ```
 
 Prompt08 did not add new C# scripts or scene root GameObjects.
+
+## Prompt09 Modified Files
+
+```txt
+Assets/Scenes/SampleScene.unity
+Assets/Scripts/Presentation/CanvasHud.cs
+Assets/Scripts/Presentation/PrototypeHud.cs
+```
+
+Prompt09 added:
+
+```txt
+Assets/Scripts/Presentation/CanvasHud.cs
+CanvasUIRoot scene object
+```
+
+No gameplay system files were modified by Prompt09.
 
 ## Current Data Assets
 

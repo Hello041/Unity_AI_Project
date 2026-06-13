@@ -55,7 +55,23 @@ namespace TacticalRoguelike.Presentation
         [SerializeField]
         private bool showHud = true;
 
-        private string lastMessage = "Ready.";
+        
+
+        public string LastMessage
+        {
+            get { return lastMessage; }
+        }
+
+        public bool IsHudVisible
+        {
+            get { return showHud; }
+        }
+
+        public void SetHudVisible(bool visible)
+        {
+            showHud = visible;
+        }
+private string lastMessage = "Ready.";
 
         private void Awake()
         {
@@ -335,11 +351,6 @@ private void DrawButtons()
             if (GUILayout.Button("2. Start Battle"))
             {
                 StartBattle();
-            }
-
-            if (GUILayout.Button("Reset Preparation"))
-            {
-                RestartCurrentSession();
             }
         }
 
@@ -775,6 +786,27 @@ private void HandleStageAdvanceRequested(StageEventData data)
         {
             ResetBattleRuntimeState();
             lastMessage = "Next stage preparation ready.";
+        }
+
+
+public void SelectKingForPlacement()
+        {
+            SelectManualPlacementPiece(kingDefinition);
+        }
+
+        public void SelectRookForPlacement()
+        {
+            SelectManualPlacementPiece(rookDefinition);
+        }
+
+        public void SelectKnightForPlacement()
+        {
+            SelectManualPlacementPiece(knightDefinition);
+        }
+
+        public void SelectPawnForPlacement()
+        {
+            SelectManualPlacementPiece(pawnDefinition);
         }
 }
 }
