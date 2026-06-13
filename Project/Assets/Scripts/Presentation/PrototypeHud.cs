@@ -68,14 +68,16 @@ private void OnEnable()
             if (gameManager != null)
             {
                 gameManager.OnBattleResetRequested += HandleBattleResetRequested;
+                gameManager.OnStageAdvanceRequested += HandleStageAdvanceRequested;
             }
         }
 
-        private void OnDisable()
+private void OnDisable()
         {
             if (gameManager != null)
             {
                 gameManager.OnBattleResetRequested -= HandleBattleResetRequested;
+                gameManager.OnStageAdvanceRequested -= HandleStageAdvanceRequested;
             }
         }
 
@@ -96,7 +98,7 @@ private void OnGUI()
                 return;
             }
 
-            if (state == GameState.StageClear || state == GameState.GameOver)
+            if (state == GameState.StageClear || state == GameState.Victory || state == GameState.GameOver)
             {
                 DrawResultScreen(state);
                 return;
@@ -105,7 +107,7 @@ private void OnGUI()
             DrawGameplayHud();
         }
 
-        public void SetupPlayerMvpLoadoutAndPlacement()
+public void SetupPlayerMvpLoadoutAndPlacement()
         {
             EnsureReferences();
             if (preparationManager == null)
@@ -114,8 +116,11 @@ private void OnGUI()
                 return;
             }
 
-            ClearAllPieces();
             preparationManager.ClearPreparation();
+            if (enemySetupManager != null && gameManager != null)
+            {
+                enemySetupManager.SpawnSetupForStage(gameManager.CurrentStage);
+            }
 
             bool added = preparationManager.TryAddPieceToLoadout(kingDefinition)
                 && preparationManager.TryAddPieceToLoadout(rookDefinition)
@@ -158,16 +163,17 @@ public void StartBattle()
                 return;
             }
 
-            if (enemySetupManager != null && enemySetupManager.SpawnedEnemyCount == 0)
+            if (enemySetupManager == null || gameManager == null)
             {
-                if (enemySetupManager.ActiveSetup != null)
-                {
-                    enemySetupManager.SpawnSetup(enemySetupManager.ActiveSetup);
-                }
-                else
-                {
-                    enemySetupManager.SpawnRandomSetup();
-                }
+                lastMessage = "Stage encounter is unavailable.";
+                return;
+            }
+
+            if (enemySetupManager.SpawnedEnemyCount == 0
+                && !enemySetupManager.SpawnSetupForStage(gameManager.CurrentStage))
+            {
+                lastMessage = "Stage encounter failed to spawn.";
+                return;
             }
 
             bool started = preparationManager.TryStartBattle();
@@ -182,6 +188,11 @@ public void ResetPrototype()
 private void DrawStatus()
         {
             GameState state = gameManager != null ? gameManager.CurrentState : GameState.Boot;
+
+            if (gameManager != null && gameManager.CurrentStage > 0)
+            {
+                GUILayout.Label("Current Stage: " + gameManager.CurrentStageLabel);
+            }
             GUILayout.Label("State: " + state);
 
             if (gameManager != null && gameManager.PlayerHealth != null)
@@ -227,6 +238,23 @@ private void DrawStatus()
             {
                 string setupName = enemySetupManager.ActiveSetup != null ? enemySetupManager.ActiveSetup.PatternName : "None";
                 GUILayout.Label("Enemy Pattern: " + setupName);
+
+
+                if (state == GameState.Preparation && enemySetupManager.ActiveSetup != null)
+                {
+                    EnemySpawnEntry[] entries = enemySetupManager.ActiveSetup.SpawnEntries;
+                    if (entries != null)
+                    {
+                        for (int i = 0; i < entries.Length; i++)
+                        {
+                            PieceDefinition piece = entries[i] != null ? entries[i].PieceDefinition : null;
+                            if (piece != null)
+                            {
+                                GUILayout.Label("- " + piece.DisplayName);
+                            }
+                        }
+                    }
+                }
                 GUILayout.Label("Enemy Count: " + enemySetupManager.SpawnedEnemyCount);
             }
 
@@ -286,12 +314,7 @@ private void DrawButtons()
                 SetupPlayerMvpLoadoutAndPlacement();
             }
 
-            if (GUILayout.Button("2. Spawn Random Enemies"))
-            {
-                SpawnRandomEnemies();
-            }
-
-            if (GUILayout.Button("3. Start Battle"))
+            if (GUILayout.Button("2. Start Battle"))
             {
                 StartBattle();
             }
@@ -419,9 +442,9 @@ private void DrawGameplayHud()
             GUILayout.BeginArea(new Rect(12f, 12f, 340f, 460f), GUI.skin.box);
             GUILayout.Label("Tactical Roguelike MVP");
             GUILayout.Space(4f);
-            DrawStatus();
-            GUILayout.Space(8f);
             DrawButtons();
+            GUILayout.Space(8f);
+            DrawStatus();
             GUILayout.Space(8f);
             GUILayout.Label("Feedback: " + lastMessage);
             GUILayout.EndArea();
@@ -436,8 +459,21 @@ private void DrawResultScreen(GameState state)
 
             GUILayout.BeginArea(area, GUI.skin.window);
             GUILayout.FlexibleSpace();
-            GUILayout.Label(state == GameState.StageClear ? "STAGE CLEAR" : "GAME OVER", GUI.skin.box);
+
+            if (state == GameState.StageClear)
+            {
+                GUILayout.Label(gameManager != null ? gameManager.CurrentStageLabel.ToUpperInvariant() + " CLEAR" : "STAGE CLEAR", GUI.skin.box);
+                GUILayout.Space(12f);
+                GUILayout.Label("Advancing to the next stage...");
+                GUILayout.FlexibleSpace();
+                GUILayout.EndArea();
+                return;
+            }
+
+            bool isVictory = state == GameState.Victory;
+            GUILayout.Label(isVictory ? "VICTORY" : "GAME OVER", GUI.skin.box);
             GUILayout.Space(12f);
+            GUILayout.Label(isVictory ? "All Stages Cleared" : "The session has ended.");
 
             if (gameManager != null && gameManager.PlayerHealth != null)
             {
@@ -445,7 +481,7 @@ private void DrawResultScreen(GameState state)
             }
 
             GUILayout.Space(16f);
-            if (GUILayout.Button("Restart", GUILayout.Height(40f)))
+            if (GUILayout.Button("Restart Session", GUILayout.Height(40f)))
             {
                 RestartCurrentSession();
             }
@@ -598,6 +634,11 @@ private void DrawBattleStatusPanel()
             const float height = 120f;
             GUILayout.BeginArea(new Rect(12f, Screen.height - height - 12f, width, height), GUI.skin.box);
             GUILayout.Label("Battle Status");
+
+            if (gameManager != null)
+            {
+                GUILayout.Label("Current Stage: " + gameManager.CurrentStageLabel);
+            }
             GUILayout.Label("State: " + (gameManager != null ? gameManager.CurrentState.ToString() : "Unknown"));
 
             if (gameManager != null && gameManager.PlayerHealth != null)
@@ -709,6 +750,13 @@ private void DrawFirstMoveNotice()
             GUILayout.Label("BATTLE START", GUI.skin.box);
             GUILayout.Label("Make your first move to begin the battle.", GUILayout.Height(24f));
             GUILayout.EndArea();
+        }
+
+
+private void HandleStageAdvanceRequested(StageEventData data)
+        {
+            ResetBattleRuntimeState();
+            lastMessage = "Next stage preparation ready.";
         }
 }
 }

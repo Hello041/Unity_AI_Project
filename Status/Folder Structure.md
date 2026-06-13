@@ -6,7 +6,7 @@ Current Unity project root:
 C:/Unity_AI_Project/Project
 ```
 
-This document reflects the current implemented MVP state after Prompt06 completion.
+This document reflects the current implemented MVP state after Prompt07 completion.
 
 ## Assets
 
@@ -153,7 +153,8 @@ Assets/
 │  ├─ prompt06_stage_clear.png
 │  ├─ prompt06_game_over.png
 │  ├─ prompt06_ux_first_move_verified.png
-│  └─ prompt06_ux_active_hud_final.png
+│  ├─ prompt06_ux_active_hud_final.png
+│  └─ prompt07_stage1_preparation.png
 │
 ├─ Settings/
 │  ├─ DefaultVolumeProfile.asset
@@ -196,6 +197,7 @@ StageStart
 Preparation
 Playing
 StageClear
+Victory
 GameOver
 ```
 
@@ -204,6 +206,14 @@ Prompt06 modification:
 ```txt
 GameManager publishes a battle reset request when the Player King is captured and HP remains.
 The retry returns to Preparation without resetting stage HP or the selected encounter.
+```
+
+Prompt07 modification:
+
+```txt
+GameManager tracks the deterministic three-stage session.
+Each stage encounter is generated before Preparation.
+StageClear advances automatically, and Stage 3 clear enters Victory.
 ```
 
 ### Health
@@ -312,7 +322,7 @@ EnemySetupManager
 EnemySpawnEntry
 ```
 
-Handles simple weighted enemy pattern spawning.
+Handles deterministic stage encounter spawning while retaining the older random setup API for backward compatibility.
 
 Prompt06 modifications:
 
@@ -320,6 +330,13 @@ Prompt06 modifications:
 Enemy runtime instances can be cleared without clearing ActiveSetup.
 The same active setup is respawned for a Player King capture retry.
 SpawnedEnemyCount reflects active, non-captured enemies.
+```
+
+Prompt07 modifications:
+
+```txt
+SpawnSetupForStage maps Stage 1, Stage 2, and Stage 3 to fixed patterns.
+The random setup API remains backward compatible but is no longer used by the player workflow.
 ```
 
 ### Enemy AI
@@ -360,7 +377,7 @@ Current AI priority:
 PrototypeHud
 ```
 
-Handles prototype status display, setup buttons, enemy spawn button, battle start button, reset button, and result banner.
+Handles prototype status display, setup controls, battle start, reset controls, and result presentation.
 
 Prompt06 presentation additions:
 
@@ -373,6 +390,17 @@ Global cooldown progress bar
 Selected piece information panel
 Enemy team composition panel
 Battle / Enemy AI status panel
+```
+
+Prompt07 presentation additions:
+
+```txt
+Current stage label
+Automatic StageClear transition display
+Victory result screen
+Restart Session and Return To Title stage reset
+Spawn Random Enemies button removed from the Preparation workflow
+Preparation buttons render before the expanded status block so Start Battle remains visible
 ```
 
 ## Prompt06 Modified Files
@@ -389,6 +417,26 @@ Assets/Scripts/Presentation/PrototypeHud.cs
 ```
 
 Prompt06 did not add new C# script files or scene root GameObjects.
+
+## Prompt07 Modified Files
+
+```txt
+Assets/Scripts/Core/GameManager.cs
+Assets/Scripts/Core/GameState.cs
+Assets/Scripts/Gameplay/Stage/EnemySetupManager.cs
+Assets/Scripts/Presentation/PrototypeHud.cs
+Assets/Screenshots/prompt07_stage1_preparation.png
+```
+
+Prompt07 did not add new C# script files or scene root GameObjects.
+
+Prompt07 post-fix:
+
+```txt
+Assets/Scripts/Presentation/PrototypeHud.cs
+```
+
+The post-fix only changed Preparation HUD rendering order.
 
 ## Current Data Assets
 

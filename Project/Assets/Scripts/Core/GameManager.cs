@@ -1,5 +1,7 @@
 using System;
 using TacticalRoguelike.Data;
+
+using TacticalRoguelike.Gameplay.Stage;
 using TacticalRoguelike.Gameplay.Health;
 using UnityEngine;
 
@@ -20,13 +22,25 @@ namespace TacticalRoguelike.Core
         private StageDefinition stageDefinition;
 
         [SerializeField]
+        private EnemySetupManager enemySetupManager;
+
+        [SerializeField]
+        private float stageClearAdvanceDelay = 1f;
+
+        [SerializeField]
         private bool autoEnterPreparationOnStart = false;
 
         private GameState currentState = GameState.Boot;
+        private int currentStage;
+
+        public const int TotalStages = 3;
 
         public event Action<StageEventData> OnStageStarted;
         public event Action<StageEventData> OnPreparationStarted;
         public event Action<StageEventData> OnBattleStarted;
+
+        public event Action<StageEventData> OnStageAdvanceRequested;
+        public event Action<StageEventData> OnVictory;
         public event Action<StageEventData> OnStageCleared;
         
         public event Action<StageEventData> OnBattleResetRequested;
@@ -38,12 +52,23 @@ public event Action<StageEventData> OnGameOver;
             get { return currentState; }
         }
 
+
+
+        public int CurrentStage
+        {
+            get { return currentStage; }
+        }
+
+        public string CurrentStageLabel
+        {
+            get { return currentStage > 0 ? "Stage " + currentStage : "No Active Stage"; }
+        }
         public PlayerHealthService PlayerHealth
         {
             get { return playerHealthService; }
         }
 
-        private void Awake()
+private void Awake()
         {
             if (playerHealthService == null)
             {
@@ -53,6 +78,11 @@ public event Action<StageEventData> OnGameOver;
             if (playerHealthService == null)
             {
                 playerHealthService = gameObject.AddComponent<PlayerHealthService>();
+            }
+
+            if (enemySetupManager == null)
+            {
+                enemySetupManager = FindFirstObjectByType<EnemySetupManager>();
             }
         }
 
@@ -82,8 +112,10 @@ private void Start()
             }
         }
 
-        public void EnterBoot()
+public void EnterBoot()
         {
+            CancelInvoke(nameof(AdvanceToNextStage));
+            currentStage = 0;
             ChangeState(GameState.Boot);
         }
 
@@ -95,13 +127,10 @@ public void StartStage()
                 return;
             }
 
-            ChangeState(GameState.StageStart);
-
+            currentStage = 1;
             int maxHealth = stageDefinition != null ? stageDefinition.PlayerMaxHealth : playerStartingHp;
             playerHealthService.ResetForStage(maxHealth);
-            PublishStageEvent(OnStageStarted, "Stage started.");
-
-            StartPreparation();
+            BeginCurrentStage();
         }
 
         public void StartPreparation()
@@ -128,7 +157,7 @@ public void StartStage()
             PublishStageEvent(OnBattleStarted, "Battle started.");
         }
 
-        public void NotifyEnemyKingCaptured()
+public void NotifyEnemyKingCaptured()
         {
             if (currentState != GameState.Playing)
             {
@@ -136,8 +165,16 @@ public void StartStage()
                 return;
             }
 
+            if (currentStage >= TotalStages)
+            {
+                ChangeState(GameState.Victory);
+                PublishStageEvent(OnVictory, "All stages cleared. Victory.");
+                return;
+            }
+
             ChangeState(GameState.StageClear);
-            PublishStageEvent(OnStageCleared, "Enemy king captured. Stage clear.");
+            PublishStageEvent(OnStageCleared, CurrentStageLabel + " cleared.");
+            Invoke(nameof(AdvanceToNextStage), Mathf.Max(0f, stageClearAdvanceDelay));
         }
 
 public void NotifyPlayerKingCaptured()
@@ -207,9 +244,11 @@ private void HandlePlayerHealthDepleted(HealthEventData data)
 
 private void PublishStageEvent(Action<StageEventData> stageEvent, string message)
         {
-            string activeStageId = stageDefinition != null && !string.IsNullOrWhiteSpace(stageDefinition.StageName)
-                ? stageDefinition.StageName
-                : stageId;
+            string activeStageId = currentStage > 0
+                ? CurrentStageLabel
+                : stageDefinition != null && !string.IsNullOrWhiteSpace(stageDefinition.StageName)
+                    ? stageDefinition.StageName
+                    : stageId;
             StageEventData data = new StageEventData(currentState, activeStageId, message);
             Debug.Log(message);
 
@@ -218,5 +257,36 @@ private void PublishStageEvent(Action<StageEventData> stageEvent, string message
                 stageEvent(data);
             }
         }
-    }
+    
+
+
+
+
+private void BeginCurrentStage()
+        {
+            ChangeState(GameState.StageStart);
+
+            if (enemySetupManager == null)
+            {
+                enemySetupManager = FindFirstObjectByType<EnemySetupManager>();
+            }
+
+            if (enemySetupManager == null || !enemySetupManager.SpawnSetupForStage(currentStage))
+            {
+                Debug.LogError("Failed to generate enemy encounter for " + CurrentStageLabel + ".");
+                return;
+            }
+
+            PublishStageEvent(OnStageStarted, CurrentStageLabel + " started.");
+            StartPreparation();
+        }
+
+
+private void AdvanceToNextStage()
+        {
+            PublishStageEvent(OnStageAdvanceRequested, "Preparing next stage.");
+            currentStage++;
+            BeginCurrentStage();
+        }
+}
 }

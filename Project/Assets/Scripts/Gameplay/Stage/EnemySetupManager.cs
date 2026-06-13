@@ -21,6 +21,14 @@ namespace TacticalRoguelike.Gameplay.Stage
         private Transform piecesRoot;
 
         private readonly List<PieceController> spawnedEnemies = new List<PieceController>();
+
+
+        private static readonly string[] StagePatternNames =
+        {
+            "PatternA_KingRookPawn",
+            "PatternB_KingKnightPawnPawn",
+            "PatternC_KingRookKnight"
+        };
         private EnemySetupDefinition activeSetup;
 
         public EnemySetupDefinition ActiveSetup
@@ -215,6 +223,41 @@ private void ClearSpawnedEnemyInstances()
 public void ClearSpawnedEnemiesForRetry()
         {
             ClearSpawnedEnemyInstances();
+        }
+
+
+public EnemySetupDefinition GetSetupForStage(int stageNumber)
+        {
+            int patternIndex = stageNumber - 1;
+            if (patternIndex < 0 || patternIndex >= StagePatternNames.Length || enemySetups == null)
+            {
+                return null;
+            }
+
+            string requiredPatternName = StagePatternNames[patternIndex];
+            for (int i = 0; i < enemySetups.Length; i++)
+            {
+                EnemySetupDefinition setup = enemySetups[i];
+                if (setup != null && (setup.PatternName == requiredPatternName || setup.name == requiredPatternName))
+                {
+                    return setup;
+                }
+            }
+
+            return null;
+        }
+
+
+public bool SpawnSetupForStage(int stageNumber)
+        {
+            EnemySetupDefinition setup = GetSetupForStage(stageNumber);
+            if (setup == null)
+            {
+                Debug.LogWarning("No enemy setup is configured for Stage " + stageNumber + ".");
+                return false;
+            }
+
+            return SpawnSetup(setup);
         }
 }
 }

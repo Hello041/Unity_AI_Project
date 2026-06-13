@@ -6,7 +6,7 @@ Current scene:
 Assets/Scenes/SampleScene.unity
 ```
 
-This document reflects the current implemented MVP state after Prompt06 completion.
+This document reflects the current implemented MVP state after Prompt07 completion.
 
 ## SampleScene Root Hierarchy
 
@@ -92,18 +92,25 @@ Purpose:
 ```txt
 Owns core game state flow.
 Owns player health service.
-Transitions through Boot, StageStart, Preparation, Playing, StageClear, and GameOver.
+Transitions through Boot, StageStart, Preparation, Playing, StageClear, Victory, and GameOver.
 ```
 
 Implemented flow:
 
 ```txt
 Boot / Title
-→ StageStart
-→ Preparation
-→ Playing / First Move Phase
-→ Playing / Enemy AI Active
-→ StageClear / GameOver
+→ Stage 1 / Preparation / Battle / StageClear
+→ Stage 2 / Preparation / Battle / StageClear
+→ Stage 3 / Preparation / Battle
+→ Victory / GameOver
+```
+
+Prompt07 stage mapping:
+
+```txt
+Stage 1 -> PatternA_KingRookPawn
+Stage 2 -> PatternB_KingKnightPawnPawn
+Stage 3 -> PatternC_KingRookKnight
 ```
 
 Key calls:
@@ -327,6 +334,7 @@ Purpose:
 Chooses and spawns lightweight enemy setup patterns.
 Preserves ActiveSetup during a Player King capture retry.
 Respawns the same encounter when the next retry battle begins.
+Spawns the fixed encounter for the current stage before Preparation begins.
 ```
 
 Current enemy patterns:
@@ -388,11 +396,20 @@ Rook
 Knight
 Pawn
 Setup Player MVP
-Spawn Random Enemies
 Start Battle
 Reset Preparation
-Restart
+Restart Session
 Return to Title
+```
+
+Prompt07 HUD behavior:
+
+```txt
+Current stage is visible during Preparation and Playing.
+StageClear shows the cleared stage while automatic advancement is pending.
+Victory shows All Stages Cleared with Restart Session and Return To Title.
+The Spawn Random Enemies button is no longer shown.
+Preparation controls render before the expanded status block so Start Battle remains visible.
 ```
 
 ### EnemyAIRoot
@@ -495,7 +512,7 @@ Created by:
 ```txt
 EnemySetupManager.SpawnRandomSetup()
 EnemySetupManager.SpawnSetup(...)
-PrototypeHud.SpawnRandomEnemies()
+EnemySetupManager.SpawnSetupForStage(...)
 ```
 
 Name pattern:
@@ -531,18 +548,16 @@ Recommended editor flow:
 1. Enter Play Mode
 2. Confirm the Title screen is visible
 3. Click Start Game and confirm Preparation
-4. Click Setup Player MVP
-5. Click Spawn Random Enemies
+4. Confirm Pattern A and its board positions are already visible
+5. Click Setup Player MVP
 6. Click Start Battle
 7. Confirm the First Move Notice and Enemy AI waiting state
-8. Confirm Enemy AI does not move before a successful player move
-9. Click a player piece and confirm selected piece information
-10. Click a valid destination to complete the first move
-11. Confirm the notice disappears and Enemy AI becomes active
-12. Confirm the global cooldown bar updates
-13. Capture Enemy King to reach StageClear
-14. Allow Player King capture to verify retry and GameOver flows
-15. Use Restart or Return to Title to replay
+8. Complete the battle and capture the Enemy King
+9. Confirm StageClear advances to Stage 2 with Pattern B
+10. Complete Stage 2 and confirm Stage 3 uses Pattern C
+11. Complete Stage 3 and confirm Victory
+12. Use Restart Session and confirm Stage 1 / Pattern A
+13. Use Return To Title and confirm Boot
 ```
 
 Current verified results:
@@ -551,7 +566,7 @@ Current verified results:
 Board appears in Play Mode
 Prototype HUD appears in Play Mode
 Player MVP setup places pieces on valid rows
-Random enemy setup places enemies on top rows
+Stage enemy setup automatically places enemies on top rows before Preparation
 2D sprite pieces appear above the 3D board
 Enemy AI moves automatically during Playing
 Enemy AI uses existing movement and capture rules
@@ -580,6 +595,17 @@ Selected player piece information updates during Playing
 Enemy composition matches the active enemy setup
 Player King retry preserves loadout and enemy setup
 Player King retry returns to the first move phase
+Stage 1 automatically loads Pattern A before Preparation
+Stage 2 automatically loads Pattern B before Preparation
+Stage 3 automatically loads Pattern C before Preparation
+StageClear advances in deterministic order
+Stage 3 clear reaches Victory
+Restart Session resets to Stage 1
+Return To Title clears active stage progress
+Start Battle button remains visible during Preparation
+Start Battle enters Playing in Stage 1, Stage 2, and Stage 3
+Each stage begins in the Prompt06 First Move Phase
+Player King retry remains compatible after the HUD visibility fix
 ```
 
 ## Known Scene Limitations

@@ -7,6 +7,7 @@ namespace TacticalRoguelike.Core
         Preparation,
         Playing,
         StageClear,
+        Victory,
         GameOver,
         Result
     }
