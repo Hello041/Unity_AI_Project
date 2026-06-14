@@ -119,8 +119,23 @@ public bool Initialize(PieceDefinition pieceDefinition, PieceOwner pieceOwner, G
 
             isCaptured = true;
             ClearBoardOccupancy();
+            EnsureReferences();
+
+            bool isKing = definition != null && definition.PieceType == PieceType.King;
+            if (pieceView != null)
+            {
+                pieceView.PlayCaptureFeedback(isKing, DeactivateAfterCapture);
+                return;
+            }
+
+            DeactivateAfterCapture();
+        }
+
+        private void DeactivateAfterCapture()
+        {
             gameObject.SetActive(false);
         }
+
 
         private void ApplyView()
         {

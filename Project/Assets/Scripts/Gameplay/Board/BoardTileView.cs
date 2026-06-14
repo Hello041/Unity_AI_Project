@@ -33,7 +33,7 @@ namespace TacticalRoguelike.Gameplay.Board
             switch (highlightType)
             {
                 case BoardHighlightType.Placement:
-                    ApplyColor(new Color(0.25f, 0.7f, 1f, 1f));
+                    ApplyColor(Color.Lerp(baseColor, new Color(0.25f, 0.7f, 1f, 1f), 0.28f));
                     break;
                 case BoardHighlightType.Selected:
                     ApplyColor(new Color(1f, 0.9f, 0.25f, 1f));

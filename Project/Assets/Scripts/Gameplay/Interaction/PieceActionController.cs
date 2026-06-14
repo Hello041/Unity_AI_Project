@@ -1,3 +1,4 @@
+using System.Collections;
 using System;
 using TacticalRoguelike.Core;
 using TacticalRoguelike.Gameplay.Cooldown;
@@ -22,6 +23,12 @@ namespace TacticalRoguelike.Gameplay.Interaction
         [SerializeField]
         private PlayerGlobalCooldown playerGlobalCooldown;
 
+        [SerializeField]
+        [Min(0f)]
+        private float kingCaptureTransitionDelay = 0.65f;
+
+        private bool kingCaptureTransitionPending;
+
         public event Action<PieceController, GridPosition> OnPieceMoved;
         public event Action<PieceController, PieceController, GridPosition> OnPieceCaptured;
 
@@ -33,6 +40,11 @@ namespace TacticalRoguelike.Gameplay.Interaction
 public bool TryMoveSelectedPiece(PieceController selectedPiece, GridPosition targetPosition)
         {
             EnsureReferences();
+
+            if (kingCaptureTransitionPending)
+            {
+                return false;
+            }
 
             if (selectedPiece == null || selectedPiece.IsCaptured)
             {
@@ -107,6 +119,24 @@ public bool TryMoveSelectedPiece(PieceController selectedPiece, GridPosition tar
                 return;
             }
 
+            kingCaptureTransitionPending = true;
+            StartCoroutine(NotifyKingCapturedAfterDelay(capturedOwner));
+        }
+
+        private IEnumerator NotifyKingCapturedAfterDelay(PieceOwner capturedOwner)
+        {
+            if (kingCaptureTransitionDelay > 0f)
+            {
+                yield return new WaitForSeconds(kingCaptureTransitionDelay);
+            }
+
+            kingCaptureTransitionPending = false;
+
+            if (gameManager == null || gameManager.CurrentState != GameState.Playing)
+            {
+                yield break;
+            }
+
             if (capturedOwner == PieceOwner.Enemy)
             {
                 gameManager.NotifyEnemyKingCaptured();
@@ -116,6 +146,7 @@ public bool TryMoveSelectedPiece(PieceController selectedPiece, GridPosition tar
                 gameManager.NotifyPlayerKingCaptured();
             }
         }
+
 
 private void EnsureReferences()
         {
@@ -178,14 +209,17 @@ private void HandlePlayerKingThreatAfterMove(PieceController selectedPiece)
                 || selectedPiece.Definition.PieceType != PieceType.King
                 || movementService == null
                 || gameManager == null
-                || gameManager.CurrentState != GameState.Playing)
+                || gameManager.CurrentState != GameState.Playing
+                || kingCaptureTransitionPending)
             {
                 return;
             }
 
             if (movementService.IsPositionThreatenedBy(selectedPiece.GridPosition, PieceOwner.Enemy))
             {
-                gameManager.NotifyPlayerKingCaptured();
+                selectedPiece.Capture();
+                kingCaptureTransitionPending = true;
+                StartCoroutine(NotifyKingCapturedAfterDelay(PieceOwner.Player));
             }
         }
 }

@@ -108,24 +108,25 @@ public EnemyMove SelectMove(BoardManager boardManager, PieceMovementService move
                 }
             }
 
-            if (openingPawnMoves.Count > 0)
-            {
-                return openingPawnMoves[Random.Range(0, openingPawnMoves.Count)];
-            }
-
-            if (bestNonKingCapture.IsValid)
+            if (bestNonKingCapture.IsValid
+                && (!bestKingCapture.IsValid || bestNonKingCaptureValue >= bestKingCaptureValue))
             {
                 return bestNonKingCapture;
-            }
-
-            if (nonKingRandomMoves.Count > 0)
-            {
-                return nonKingRandomMoves[Random.Range(0, nonKingRandomMoves.Count)];
             }
 
             if (bestKingCapture.IsValid)
             {
                 return bestKingCapture;
+            }
+
+            if (openingPawnMoves.Count > 0)
+            {
+                return openingPawnMoves[Random.Range(0, openingPawnMoves.Count)];
+            }
+
+            if (nonKingRandomMoves.Count > 0)
+            {
+                return nonKingRandomMoves[Random.Range(0, nonKingRandomMoves.Count)];
             }
 
             if (kingRandomMoves.Count == 0)
