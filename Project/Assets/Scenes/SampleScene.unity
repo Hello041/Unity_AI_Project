@@ -1985,7 +1985,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.039215688, g: 0.05882353, b: 0.09803922, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -6725,6 +6725,7 @@ MonoBehaviour:
   movementService: {fileID: 103422531}
   gameManager: {fileID: 1385456177}
   playerGlobalCooldown: {fileID: 860270461}
+  kingCaptureTransitionDelay: 0.65
 --- !u!4 &1382513556
 Transform:
   m_ObjectHideFlags: 0
@@ -8385,6 +8386,7 @@ MonoBehaviour:
   preparationManager: {fileID: 1770450751}
   boardView: {fileID: 477954971}
   boardManager: {fileID: 477954972}
+  gameManager: {fileID: 0}
 --- !u!21 &1788560354
 Material:
   serializedVersion: 8

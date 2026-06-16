@@ -169,7 +169,7 @@ private void OnGUI()
             }
 
             lastMessage = added && placed
-                ? LocalizeStageLabel(gameManager.CurrentStageLabel) + " 추천 편성을 배치했습니다."
+                ? LocalizeStageLabel(gameManager.CurrentStageLabel) + " 기본 편성을 배치했습니다."
                 : "플레이어 배치에 실패했습니다.";
         }
 
@@ -305,7 +305,7 @@ private void DrawButtons()
 
             GUILayout.Space(6f);
             GUILayout.Label("빠른 설정");
-            if (GUILayout.Button("1. 추천 배치")) SetupPlayerMvpLoadoutAndPlacement();
+            if (GUILayout.Button("1. 기본 배치")) SetupPlayerMvpLoadoutAndPlacement();
             if (GUILayout.Button("2. 전투 시작")) StartBattle();
         }
 
@@ -480,7 +480,7 @@ private void DrawTitleScreen()
 
             GUILayout.BeginArea(area, GUI.skin.window);
             GUILayout.FlexibleSpace();
-            GUILayout.Label("택티컬 로그라이크 체스", GUI.skin.box);
+            GUILayout.Label("로그라이크 체스", GUI.skin.box);
             GUILayout.Space(16f);
             GUILayout.Label("6x6 실시간 체스 전투");
             GUILayout.Space(16f);

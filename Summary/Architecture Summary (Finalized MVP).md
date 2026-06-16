@@ -1,69 +1,69 @@
-# Architecture Summary (Finalized MVP)
+﻿# Architecture Summary (Finalized MVP)
 
-## 최종 MVP 범위
+## 理쒖쥌 MVP 踰붿쐞
 
-* Unity 6.3 LTS (6000.3.11f1) 대상
-* 한 개의 플레이 가능한 Tactical Stage
-* 실시간 체스식 이동
-* 개별 쿨다운 + 플레이어 글로벌 쿨다운
-* 경량 Roguelike 요소는 사전 정의된 적 패턴 랜덤 선택으로 제한
-* 3D 타일 보드 + 2D 16x32 말 스프라이트 사용
+* Unity 6.3 LTS (6000.3.11f1) ???
+* ??媛쒖쓽 ?뚮젅??媛?ν븳 Tactical Stage
+* ?ㅼ떆媛?泥댁뒪???대룞
+* 媛쒕퀎 荑⑤떎??+ ?뚮젅?댁뼱 湲濡쒕쾶 荑⑤떎??
+* 寃쎈웾 Roguelike ?붿냼???ъ쟾 ?뺤쓽?????⑦꽩 ?쒕뜡 ?좏깮?쇰줈 ?쒗븳
+* 3D ???蹂대뱶 + 2D 16x32 留??ㅽ봽?쇱씠???ъ슜
 
 ---
 
-## 핵심 게임 규칙
+## ?듭떖 寃뚯엫 洹쒖튃
 
-* 플레이어는 King, Rook, Knight, Pawn 사용
-* 적도 King, Rook, Knight, Pawn 사용
-* Enemy King 캡처 시 StageClear
+* ?뚮젅?댁뼱??King, Rook, Knight, Pawn ?ъ슜
+* ?곷룄 King, Rook, Knight, Pawn ?ъ슜
+* Enemy King 罹≪쿂 ??StageClear
 
 ### Player HP
 
-* Player HP는 3
-* MVP에서는 적 AI, 적 턴, 체크, 체크메이트 시스템을 구현하지 않는다.
-* 대신 Player King 이동 직후 Enemy Capture 판정을 수행한다.
-* Player King이 Enemy 말의 이동 규칙 기준으로 캡처 가능한 타일에 진입한 경우, Enemy에게 캡처된 것으로 간주한다.
+* Player HP??3
+* MVP?먯꽌????AI, ???? 泥댄겕, 泥댄겕硫붿씠???쒖뒪?쒖쓣 援ы쁽?섏? ?딅뒗??
+* ???Player King ?대룞 吏곹썑 Enemy Capture ?먯젙???섑뻾?쒕떎.
+* Player King??Enemy 留먯쓽 ?대룞 洹쒖튃 湲곗??쇰줈 罹≪쿂 媛?ν븳 ??쇱뿉 吏꾩엯??寃쎌슦, Enemy?먭쾶 罹≪쿂??寃껋쑝濡?媛꾩＜?쒕떎.
 
 ```txt
 Player King Captured
-→ HP -1
+??HP -1
 ```
 
-* 이는 단순 위험 타일 패널티가 아니라 Enemy Capture 이벤트로 처리한다.
-* HP가 0이 되면 GameOver
+* ?대뒗 ?⑥닚 ?꾪뿕 ????⑤꼸?곌? ?꾨땲??Enemy Capture ?대깽?몃줈 泥섎━?쒕떎.
+* HP媛 0???섎㈃ GameOver
 
 ---
 
-## GameState 흐름
+## GameState ?먮쫫
 
 ```txt
 Boot
-→ StageStart
-→ Preparation
-→ Playing
+??StageStart
+??Preparation
+??Playing
 
 Playing + EnemyKingCaptured
-→ StageClear
+??StageClear
 
 Playing + PlayerHealthDepleted
-→ GameOver
+??GameOver
 ```
 
-* GameOver는 Terminal State
-* HUD Reset 시 Preparation 상태로 복귀 가능
+* GameOver??Terminal State
+* HUD Reset ??Preparation ?곹깭濡?蹂듦? 媛??
 
 ---
 
-## Board 규칙
+## Board 洹쒖튃
 
-* 기본 보드 크기: 6x6
-* BoardManager는 Board Size, 좌표 검증, World Position 변환, Tile Occupancy의 단일 책임자
-* 좌표 (0,0)은 플레이어 기준 좌하단
-* 이동 및 배치 로직은 6x6을 하드코딩하지 않고 BoardManager 기준으로 처리
+* 湲곕낯 蹂대뱶 ?ш린: 6x6
+* BoardManager??Board Size, 醫뚰몴 寃利? World Position 蹂?? Tile Occupancy???⑥씪 梨낆엫??
+* 醫뚰몴 (0,0)? ?뚮젅?댁뼱 湲곗? 醫뚰븯??
+* ?대룞 諛?諛곗튂 濡쒖쭅? 6x6???섎뱶肄붾뵫?섏? ?딄퀬 BoardManager 湲곗??쇰줈 泥섎━
 
 ---
 
-## Loadout 규칙
+## Loadout 洹쒖튃
 
 ```txt
 Max Cost = 7
@@ -74,63 +74,63 @@ Knight = 2
 Rook = 3
 ```
 
-* King은 필수
-* 예산 초과 시 선택 및 배치 불가
+* King? ?꾩닔
+* ?덉궛 珥덇낵 ???좏깮 諛?諛곗튂 遺덇?
 
 ---
 
-## Placement 규칙
+## Placement 洹쒖튃
 
-### 플레이어 배치 영역
+### ?뚮젅?댁뼱 諛곗튂 ?곸뿭
 
 ```txt
 y = 0
 y = 1
 ```
 
-### 적 배치 영역
+### ??諛곗튂 ?곸뿭
 
 ```txt
 y = boardHeight - 2
 y = boardHeight - 1
 ```
 
-기본 6x6 기준:
+湲곕낯 6x6 湲곗?:
 
 ```txt
 y = 4
 y = 5
 ```
 
-### 배치 제약
+### 諛곗튂 ?쒖빟
 
-* 중복 배치 불가
-* King 없이 시작 불가
-* 예산 초과 시 시작 불가
+* 以묐났 諛곗튂 遺덇?
+* King ?놁씠 ?쒖옉 遺덇?
+* ?덉궛 珥덇낵 ???쒖옉 遺덇?
 
-### 배치 흐름
+### 諛곗튂 ?먮쫫
 
 ```txt
 Piece Button Click
-→ Valid Tile Click
-→ Piece Placed
+??Valid Tile Click
+??Piece Placed
 ```
 
-* 자동 MVP 배치 버튼은 프로토타입 테스트용으로 유지
+* ?먮룞 MVP 諛곗튂 踰꾪듉? ?꾨줈?좏????뚯뒪?몄슜?쇰줈 ?좎?
 
 ---
 
-## Cooldown 규칙
+## Cooldown 洹쒖튃
 
 ### Piece Cooldown
 
-* 모든 말은 PieceCooldown 보유
+* 紐⑤뱺 留먯? PieceCooldown 蹂댁쑀
 
 ### Global Cooldown
 
-* 플레이어 말 이동 성공 시 PlayerGlobalCooldown 시작
+* ?뚮젅?댁뼱 留??대룞 ?깃났 ??PlayerGlobalCooldown ?쒖옉
 
-### 이동 가능 조건
+### ?대룞 媛??議곌굔
 
 ```txt
 PieceCooldown Ready
@@ -138,7 +138,7 @@ AND
 GlobalCooldown Inactive
 ```
 
-### 이동 성공 시
+### ?대룞 ?깃났 ??
 
 ```txt
 Start Piece Cooldown
@@ -146,7 +146,7 @@ Start Piece Cooldown
 Start Global Cooldown
 ```
 
-### 이동 실패 시
+### ?대룞 ?ㅽ뙣 ??
 
 ```txt
 No Cooldown Applied
@@ -154,11 +154,11 @@ No Cooldown Applied
 
 ---
 
-## Enemy Setup 규칙
+## Enemy Setup 洹쒖튃
 
-### 적 AI
+### ??AI
 
-* 구현하지 않음
+* 援ы쁽?섏? ?딆쓬
 
 ### Enemy Patterns
 
@@ -187,16 +187,16 @@ Rook
 Knight
 ```
 
-### 생성 규칙
+### ?앹꽦 洹쒖튃
 
-* EnemySetupDefinition ScriptableObject 사용
-* EnemySetupManager가 패턴 중 하나를 랜덤 선택
-* 적 배치 영역에 자동 배치
-* 전투 시작 시 적이 없으면 HUD가 랜덤 적 생성 보장
+* EnemySetupDefinition ScriptableObject ?ъ슜
+* EnemySetupManager媛 ?⑦꽩 以??섎굹瑜??쒕뜡 ?좏깮
+* ??諛곗튂 ?곸뿭???먮룞 諛곗튂
+* ?꾪닾 ?쒖옉 ???곸씠 ?놁쑝硫?HUD媛 ?쒕뜡 ???앹꽦 蹂댁옣
 
 ---
 
-## 필수 시스템
+## ?꾩닔 ?쒖뒪??
 
 ```txt
 GameManager
@@ -235,7 +235,7 @@ PrototypeHud
 
 ---
 
-## 제외된 시스템
+## ?쒖쇅???쒖뒪??
 
 ```txt
 RoundManager
@@ -269,3 +269,66 @@ Checkmate
 
 Castling
 ```
+---
+
+# Final Implementation Status (Prompt10 Complete)
+
+## Submission State
+
+```txt
+Feature Complete MVP / Submission Ready
+```
+
+Prompt01 through Prompt10 are complete and accepted.
+
+## Final Polish Completed
+
+* Full Korean localization for Canvas UI
+* PrototypeHud fallback localization
+* Selected piece display improvements
+* Button highlight improvements
+* Improved cooldown display readability
+* Improved UI layout and readability
+* Preparation selected-piece board highlight
+* Softer placement area highlight with checkerboard visibility preserved
+* Proper Preparation highlight cleanup
+* Team-based individual cooldown tinting
+* Player blue-gray cooldown tint
+* Enemy red-gray cooldown tint
+* Smooth cooldown color recovery
+* Player-only ready flash
+* Enemy AI priority update
+* Capture scale-up and fade-out feedback
+* Enhanced King capture feedback
+* Delayed StageClear / Retry transition after King capture feedback
+* Immediate gameplay capture resolution preserved
+
+## Final Enemy AI Priority
+
+```txt
+1. Capture Player King immediately
+2. Capture the highest-value available player piece
+3. Opening Enemy Pawn movement if no capture is available
+4. Non-King random movement
+5. Enemy King random movement fallback
+6. Wait if no valid action exists
+```
+
+## Final Validation
+
+```txt
+Stage 1 -> Stage 2 -> Stage 3 -> Victory: PASS
+Retry: PASS
+Game Over: PASS
+Return To Title: PASS
+AI validation complete: PASS
+UI validation complete: PASS
+Console Errors: 0
+Console Warnings: 0
+Scene Validation Issues: 0
+```
+
+## Future Work Policy
+
+Future work should be limited to bug fixes, documentation corrections, or minor visual polish. Do not redesign completed systems or add new gameplay architecture without explicit post-MVP approval.
+
